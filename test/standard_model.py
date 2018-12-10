@@ -96,7 +96,7 @@ SM_fields = [
     q, qc, u, uc, d, dc, l, lc, e, ec, phi, phic, bL, bR, wL, wR, gL, gR
 ]
 
-standard_model = EFT(SM_algebra, SM_fields)
+SMEFT = EFT(SM_algebra, SM_fields)
 
 if __name__ == "__main__":
-    print(standard_model.invariants(6))
+    print(SMEFT.invariants(6))

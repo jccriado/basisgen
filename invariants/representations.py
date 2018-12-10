@@ -3,6 +3,7 @@ from invariants.statistics import Statistics
 from invariants.multimap import MultivaluedMap
 
 import collections
+import copy
 import itertools
 import functools
 
@@ -20,11 +21,11 @@ class Representation(object):
         return iter(self.weights)
 
     def __mul__(self, other):
-        return Representation([
+        return Representation(collections.Counter(
             first_weight + second_weight
-            for first_weight in self
-            for second_weight in other
-        ])
+            for first_weight in self.weights.elements()
+            for second_weight in other.weights.elements()
+        ))
 
     @functools.lru_cache(maxsize=None)
     def highest_weight(self, algebra):
@@ -32,7 +33,7 @@ class Representation(object):
 
     @functools.lru_cache(maxsize=None)
     def decompose(self, algebra):
-        remaining_weights = self.weights
+        remaining_weights = copy.copy(self.weights)
         irreps = []
 
         while remaining_weights:
@@ -43,8 +44,7 @@ class Representation(object):
             current_irrep = Irrep(algebra, highest_weight)
             irreps.append(current_irrep)
 
-            for weight_to_remove in current_irrep.representation:
-                remaining_weights.remove(weight_to_remove)
+            remaining_weights -= current_irrep.representation.weights
 
         return irreps
 
@@ -57,9 +57,6 @@ class Irrep(object):
             raise Exception(str(algebra))
 
     def __str__(self):
-        # !!
-        return str(self.highest_weight)
-    
         return "Irrep({algebra}, {highest_weight})".format(
             algebra=self.algebra,
             highest_weight=self.highest_weight
@@ -143,7 +140,7 @@ class Irrep(object):
             return 1
 
         delta = self.algebra.sum_of_positive_roots
-            
+
         numerator = 2 * sum(
             previous_multiplicities.get(weight + k*alpha, 0)
             * self.algebra.scalar_product(weight + k*alpha, alpha)
@@ -178,20 +175,14 @@ class Irrep(object):
         split_highest_weight = self.algebra.split_weight(self.highest_weight)
 
         split_weights = (
-            Irrep(algebra, weight).representation
+            Irrep(algebra, weight).representation.weights.elements()
             for algebra, weight in zip(algebras, split_highest_weight)
         )
 
-        return Representation([
+        return Representation(collections.Counter([
             Weight(list(itertools.chain.from_iterable(weights)))
             for weights in itertools.product(*split_weights)
-        ])
-
-    @property
-    def _simple_representation(self):
-        return Representation(list(
-            self.weights_with_multiplicities.elements()
-        ))
+        ]))
 
     @property
     @functools.lru_cache(maxsize=None)
@@ -199,7 +190,7 @@ class Irrep(object):
         if isinstance(self.algebra, collections.Iterable):
             return self._semisimple_representation
         else:
-            return self._simple_representation
+            return Representation(self.weights_with_multiplicities)
 
     @functools.lru_cache(maxsize=None)
     def power(self, exponent, statistics):
@@ -208,11 +199,11 @@ class Irrep(object):
             Statistics.FERMION: itertools.combinations
         }[statistics]
 
-        weights = self.representation.weights
+        weights = self.representation.weights.elements()
 
-        power_weights = [
+        power_weights = collections.Counter([
             sum(combination, Irrep.singlet(self.algebra).highest_weight)
             for combination in combinations_function(weights, exponent)
-        ]
+        ])
 
         return Representation(power_weights).decompose(self.algebra)

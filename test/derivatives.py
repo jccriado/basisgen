@@ -39,4 +39,14 @@ Operator.show_irrep = True
 #print(result)
 #print(len(result))
 
-print((phi*phic**2*dc*q).invariants(8))
+# print((phi*phic**2*dc*q).invariants(8))
+invariants = SMEFT.invariants(6)
+print("Number of invariants: {}".format(
+    sum(
+        count
+        for counter in invariants.values()
+        for count in counter.values()
+    )
+))
+print(EFT.show_invariants(invariants))
+
