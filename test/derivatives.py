@@ -2,6 +2,7 @@ from invariants.fields import Operator, EFT
 from standard_model import *
 from collections import Counter
 import functools
+import itertools
 
 # print(hilbert_series_str(
 #     invariants_with_derivatives(SM_algebra, SM_fields, 6)
@@ -40,7 +41,16 @@ Operator.show_irrep = True
 #print(len(result))
 
 # print((phi*phic**2*dc*q).invariants(8))
+
+#import cProfile
+#pr = cProfile.Profile()
+#pr.enable()
+
 invariants = SMEFT.invariants(6)
+
+#pr.disable()
+#pr.print_stats(sort='time')
+
 print("Number of invariants: {}".format(
     sum(
         count
@@ -49,4 +59,8 @@ print("Number of invariants: {}".format(
     )
 ))
 print(EFT.show_invariants(invariants))
+
+
+        
+
 

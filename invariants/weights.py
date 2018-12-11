@@ -1,6 +1,6 @@
 class Weight(object):
     def __init__(self, components):
-        self.components = components
+        self.components = tuple(components)
 
     def __str__(self):
         return "({})".format(
@@ -10,22 +10,22 @@ class Weight(object):
     __repr__ = __str__
 
     def __hash__(self):
-        return hash(tuple(self))
+        return hash(self.components)
 
     def __eq__(self, other):
         return self.components == other.components
 
     def __add__(self, other):
-        return Weight([x + y for x, y in zip(self, other)])
+        return Weight(tuple(x + y for x, y in zip(self, other)))
 
     def __neg__(self):
-        return Weight([-x for x in self])
+        return Weight(tuple(-x for x in self))
 
     def __sub__(self, other):
         return self + (-other)
 
     def __mul__(self, other):
-        return Weight([other * x for x in self])
+        return Weight(tuple(other * x for x in self))
 
     __rmul__ = __mul__
 
@@ -43,4 +43,4 @@ class Weight(object):
 
     @staticmethod
     def from_string(weight_str):
-        return Weight(list(map(int, weight_str.split())))
+        return Weight(tuple(map(int, weight_str.split())))

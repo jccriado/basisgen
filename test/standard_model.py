@@ -93,7 +93,12 @@ gR = Field(
 )
 
 SM_fields = [
-    q, qc, u, uc, d, dc, l, lc, e, ec, phi, phic, bL, bR, wL, wR, gL, gR
+    q, qc,
+    u, uc, d, dc,
+    l, lc,
+    e, ec,
+    phi, phic,
+    bL, bR, wL, wR, gL, gR
 ]
 
 SMEFT = EFT(SM_algebra, SM_fields)

@@ -79,6 +79,7 @@ class Field(object):
             lorentz_irreps = [Irrep(_lorentz_algebra, highest_weight)]
 
         else:
+            # TODO: check this
             lorentz_irreps = itertools.chain.from_iterable(
                 Irrep(_lorentz_algebra, Weight([n, n])) * self.lorentz_irrep
                 for n in range(times % 2, times + 1, 2)
@@ -147,7 +148,8 @@ class Operator(object):
 
     @property
     def is_neutral(self):
-        return all(charge == 0 for charge in self.charges)
+        # TODO: fix rounding errors
+        return all(math.isclose(charge, 0) for charge in self.charges)
 
     @property
     def irreps(self):
@@ -249,7 +251,7 @@ class EFT(object):
 
     @staticmethod
     def _combinations(fields, max_dimension):
-        if len(fields) == 0:
+        if not fields:
             return [Counter()]
 
         max_exponent = math.floor(max_dimension / fields[0].dimension)
@@ -273,7 +275,7 @@ class EFT(object):
 
         print("Computing invariants...")
         print("[", end="", flush=True)
-        
+
         for progress, operator in enumerate(operators):
             if progress % round(total / 50) == 0:
                 print("=", end="", flush=True)
@@ -284,7 +286,7 @@ class EFT(object):
         print("]")
 
         return result
-        
+
         # return {
         #     operator: operator.invariants(max_dimension)
         #     for operator in self.operators(max_dimension)

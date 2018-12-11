@@ -207,3 +207,45 @@ class Irrep(object):
         ])
 
         return Representation(power_weights).decompose(self.algebra)
+
+
+    # def _weight_multiplicity(self, level, weight, previous_multiplicities):
+    #     if level == 0:
+    #         return 1
+
+    #     delta = self.algebra.sum_of_positive_roots
+
+    #     weight = np.array(weight.components)
+    #     positive_roots = np.array(self.algebra.positive_roots)
+    #     k_values = np.array(range(1, level + 1))
+    #     metric = np.array(self.algebra.metric)
+
+    #     weights_plus_k_alpha = (
+    #         weight[np.newaxis, np.newaxis, ...]
+    #         + positive_roots[np.newaxis, ...]
+    #         * k_values[..., np.newaxis, np.newaxis]
+    #     )
+
+    #     scalar_products = np.einsum(
+    #         'ijk,kl,jl->ij',
+    #         weights_plus_k_alpha,
+    #         metric,
+    #         positive_roots,
+    #         optimize=True
+    #     )
+
+    #     numerator = 2 * sum(
+    #         previous_multiplicities.get(Weight(list(weight_plus_k_alpha)), 0)
+    #         * scalar_product
+    #         for scalar_product, weight_plus_k_alpha in zip(
+    #                 scalar_products.reshape((-1,)),
+    #                 weights_plus_k_alpha.reshape((-1, len(weight)))
+    #         )
+    #     )
+
+    #     denominator = (
+    #         self.algebra.norm_squared(self.highest_weight + delta)
+    #         - self.algebra.norm_squared(Weight(list(weight)) + delta)
+    #     )
+
+    #     return int(round(numerator / denominator))
