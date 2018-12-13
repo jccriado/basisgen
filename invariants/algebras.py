@@ -6,9 +6,7 @@ import collections
 import enum
 import functools
 import itertools
-import re
 import operator
-import numpy as np
 
 
 class Series(enum.Enum):
@@ -19,6 +17,17 @@ class Series(enum.Enum):
     E = 5
     F = 6
     G = 7
+
+    def __str__(self):
+        return {
+            Series.A: 'A',
+            Series.B: 'B',
+            Series.C: 'C',
+            Series.D: 'D',
+            Series.E: 'E',
+            Series.F: 'F',
+            Series.G: 'G'
+        }[self]
 
 
 class Algebra(metaclass=abc.ABCMeta):
@@ -34,22 +43,39 @@ class Algebra(metaclass=abc.ABCMeta):
 
 
 class SimpleAlgebra(Algebra):
+    class IncorrectRank(Exception):
+        def __init__(self, series, rank, rank_bounds):
+            series = series
+            super().__init__(
+                f"Unexpected rank {rank} for algebra series {series}. "
+                f"The rank n must satisfy: {rank_bounds}"
+            )
+
     def __init__(self, series, rank):
+        SimpleAlgebra.check_rank_bounds(series, rank)
+
         self.series = series
         self.rank = rank
 
-    def __str__(self):
-        series_str = {
-            Series.A: 'A',
-            Series.B: 'B',
-            Series.C: 'C',
-            Series.D: 'D',
-            Series.E: 'E',
-            Series.F: 'F',
-            Series.G: 'G'
-        }[self.series]
+    @staticmethod
+    def check_rank_bounds(series, rank):
+        if series == Series.A and rank < 1:
+            raise SimpleAlgebra.IncorrectRank(series, rank, "n >= 1")
+        if series == Series.B and rank < 2:
+            raise SimpleAlgebra.IncorrectRank(series, rank, "n >= 2")
+        if series == Series.C and rank < 2:
+            raise SimpleAlgebra.IncorrectRank(series, rank, "n >= 2")
+        if series == Series.D and rank < 4:
+            raise SimpleAlgebra.IncorrectRank(series, rank, "n >= 4")
+        if series == Series.E and (rank < 6 or rank > 8):
+            raise SimpleAlgebra.IncorrectRank(series, rank, "6 <= n <= 8")
+        if series == Series.F and rank != 4:
+            raise SimpleAlgebra.IncorrectRank(series, rank, "n = 4")
+        if series == Series.G and rank != 2:
+            raise SimpleAlgebra.IncorrectRank(series, rank, "n = 2")
 
-        return "{series}{rank}".format(series=series_str, rank=self.rank)
+    def __str__(self):
+        return "{series}{rank}".format(series=self.series, rank=self.rank)
 
     __repr__ = __str__
 
@@ -91,7 +117,15 @@ class SimpleAlgebra(Algebra):
                 (self.rank - 1, self.rank - 3): -1,
                 (self.rank - 2, self.rank - 1): 0,
                 (self.rank - 1, self.rank - 2): 0
-            }
+            },
+            Series.E: {
+                (2, self.rank - 1): -1,
+                (self.rank - 1, 2): -1,
+                (self.rank - 1, self.rank - 2): 0,
+                (self.rank - 2, self.rank - 1): 0
+            },
+            Series.F: {(1, 2): -2},
+            Series.G: {(0, 1): -3}
         }[self.series]
 
         return generic_cartan_matrix(exceptional_elements)
@@ -107,14 +141,29 @@ class SimpleAlgebra(Algebra):
             return Weight(
                 [1] + [0] * (self.rank - 2) + [1] if self.rank > 1 else [2]
             )
-        elif self.series == Series.B or self.series == Series.D:
-            return Weight(
-                [0, 1] + [0] * (self.rank - 2)
-            )
-        elif self.series == Series.C:
-            return Weight(
-                [2] + [0] * (self.rank - 1)
-            )
+
+        if self.series == Series.B:
+            return Weight([0, 1] + [0] * (self.rank - 2))
+
+        if self.series == Series.C:
+            return Weight([2] + [0] * (self.rank - 1))
+
+        if self.series == Series.D:
+            return Weight([0, 1] + [0] * (self.rank - 2))
+
+        if self.series == Series.E:
+            if self.rank == 6:
+                return Weight([0, 0, 0, 0, 0, 1])
+            elif self.rank == 7:
+                return Weight([1, 0, 0, 0, 0, 0, 0])
+            elif self.rank == 8:
+                return Weight([0, 0, 0, 0, 0, 0, 1, 0])
+
+        if self.series == Series.F:
+            return Weight([1, 0, 0, 0])
+
+        if self.series == Series.G:
+            return Weight([1, 0])
 
     @property
     @functools.lru_cache(maxsize=None)
@@ -123,7 +172,10 @@ class SimpleAlgebra(Algebra):
             Series.A: self.rank - 1,
             Series.B: 2 * self.rank - 2,
             Series.C: 2 * self.rank - 2,
-            Series.D: 2 * self.rank - 4
+            Series.D: 2 * self.rank - 4,
+            Series.E: {6: 10, 7: 16, 8: 28}.get(self.rank, None),
+            Series.F: 10,
+            Series.G: 4
         }[self.series]
 
     @property
@@ -145,6 +197,53 @@ class SimpleAlgebra(Algebra):
     @property
     @functools.lru_cache(maxsize=None)
     def metric(self):
+        if self.series == Series.E and self.rank == 6:
+            return [
+                [4/3,  5/3,  6/3,  4/3,  2/3,  3/3],
+                [5/3, 10/3, 12/3,  8/3,  4/3,  6/3],
+                [6/3, 12/3, 18/3, 12/3,  6/3,  9/3],
+                [4/3,  8/3, 12/3, 10/3,  5/3,  6/3],
+                [2/3,  4/3,  6/3,  5/3,  4/3,  3/3],
+                [3/3,  6/3,  9/3,  6/3,  3/3,  6/3]
+            ]
+
+        if self.series == Series.E and self.rank == 7:
+            return [
+                [4/2,  6/2,  8/2,  6/2,  4/2,  2/2,  4/2],
+                [6/2, 12/2, 16/2, 12/2,  8/2,  4/2,  8/2],
+                [8/2, 16/2, 24/2, 18/2, 12/2,  6/2, 12/2],
+                [6/2, 12/2, 18/2, 15/2, 10/2,  5/2,  9/2],
+                [4/2,  8/2, 12/2, 10/2,  8/2,  4/2,  6/2],
+                [2/2,  4/2,  6/2,  5/2,  4/2,  3/2,  3/2],
+                [4/2,  8/2, 12/2,  9/2,  6/2,  3/2,  7/2]
+            ]
+
+        if self.series == Series.E and self.rank == 8:
+            return [
+                [4,   7, 10,  8,  6,  4,  2,  5],
+                [7,  14, 20, 16, 12,  8,  4, 10],
+                [10, 20, 30, 24, 18, 12,  6, 15],
+                [8,  16, 24, 20, 15, 10,  5, 12],
+                [6,  12, 18, 15, 12,  8,  4,  9],
+                [4,   8, 12, 10,  8,  6,  3,  6],
+                [2,   4,  6,  5,  4,  3,  2,  3],
+                [5,  10, 15, 12,  9,  6,  3,  8]
+            ]
+
+        if self.series == Series.F:
+            return [
+                [2, 3,   2,   1],
+                [3, 6,   4,   2],
+                [2, 4,   3, 3/2],
+                [1, 2, 3/2,   1]
+            ]
+
+        if self.series == Series.G:
+            return [
+                [2,   1],
+                [1, 2/3]
+            ]
+
         def build_matrix(element, size):
             return [[element(i, j) for j in range(size)] for i in range(size)]
 
@@ -202,7 +301,8 @@ class SimpleAlgebra(Algebra):
     def level_vector(self):
         if self.series == Series.A:
             return [(self.rank - i) * (i + 1) for i in range(self.rank)]
-        elif self.series == Series.B:
+
+        if self.series == Series.B:
             return (
                 [
                     (2*self.rank - i) * (i + 1)
@@ -210,12 +310,14 @@ class SimpleAlgebra(Algebra):
                 ]
                 + [int(self.rank * (self.rank + 1)/2)]
             )
-        elif self.series == Series.C:
+
+        if self.series == Series.C:
             return [
                 (2*self.rank - i - 1) * (i + 1)
                 for i in range(self.rank)
             ]
-        elif self.series == Series.D:
+
+        if self.series == Series.D:
             return (
                 [
                     (2*self.rank - i - 2) * (i + 1)
@@ -223,6 +325,19 @@ class SimpleAlgebra(Algebra):
                 ]
                 + [int(self.rank * (self.rank - 1)/2)] * 2
             )
+
+        if self.series == Series.E:
+            return {
+                6: [16, 30, 42, 30, 16, 22],
+                7: [34, 66, 96, 75, 52, 27, 49],
+                8: [92, 182, 270, 220, 168, 114, 58, 136]
+            }[self.rank]
+
+        if self.series == Series.F:
+            return [22, 42, 30, 16]
+
+        if self.series == Series.G:
+            return [10, 6]
 
 
 class SemisimpleAlgebra(collections.Iterable, Algebra):
@@ -281,7 +396,7 @@ class SemisimpleAlgebra(collections.Iterable, Algebra):
         return split_weight
 
     def join_weights(self, weights):
-        return Weight(list(itertools.chain.from_iterable(weights)))
+        return Weight(itertools.chain.from_iterable(weights))
 
     @property
     @functools.lru_cache(maxsize=None)
