@@ -1,107 +1,130 @@
-from invariants.weights import Weight
-from invariants.algebras import SimpleAlgebra
-from invariants.statistics import Statistics
-from invariants.representations import Irrep
+import argparse
+import cProfile
+
 from invariants.fields import Field, EFT
+from invariants.statistics import Statistics
 
-SU2 = SimpleAlgebra.from_string('A1')
-SU3 = SimpleAlgebra.from_string('A2')
-Lorentz = SU2 + SU2
+import invariants.SU2 as SU2
+import invariants.SU3 as SU3
+from invariants.Lorentz import algebra as Lorentz_algebra
+from invariants.Lorentz import scalar, L_spinor, R_spinor, L_tensor, R_tensor
 
-SU2_singlet = Irrep(SU2, Weight([0]))
-SU2_doublet = Irrep(SU2, Weight([1]))
-SU2_triplet = Irrep(SU2, Weight([2]))
 
-SU3_singlet = Irrep(SU3, Weight([0, 0]))
-SU3_triplet = Irrep(SU3, Weight([1, 0]))
-SU3_antitriplet = Irrep(SU3, Weight([0, 1]))
-SU3_octet = Irrep(SU3, Weight([1, 1]))
-
-scalar = Irrep(Lorentz, Weight([0, 0]))
-L_spinor = Irrep(Lorentz, Weight([1, 0]))
-R_spinor = Irrep(Lorentz, Weight([0, 1]))
-vector = Irrep(Lorentz, Weight([1, 1]))
-L_tensor = Irrep(Lorentz, Weight([2, 0]))
-R_tensor = Irrep(Lorentz, Weight([0, 2]))
-
-SM_algebra = Lorentz + SU3 + SU2
+SM_algebra = Lorentz_algebra + SU3.algebra + SU2.algebra
 
 q = Field(
-    'q', L_spinor, SU3_triplet + SU2_doublet, [1/6], Statistics.FERMION, 1.5
+    'q', L_spinor, SU3.triplet + SU2.doublet, [1/6], Statistics.FERMION, 1.5
 )
 qc = Field(
-    'qc', R_spinor, SU3_antitriplet + SU2_doublet, [-1/6], Statistics.FERMION,
+    'qc', R_spinor, SU3.anti_triplet + SU2.doublet, [-1/6], Statistics.FERMION,
     1.5
 )
 
 u = Field(
-    'u', R_spinor, SU3_triplet + SU2_singlet, [2/3], Statistics.FERMION, 1.5
+    'u', R_spinor, SU3.triplet + SU2.singlet, [2/3], Statistics.FERMION, 1.5
 )
 uc = Field(
-    'uc', L_spinor, SU3_antitriplet + SU2_singlet, [-2/3], Statistics.FERMION,
+    'uc', L_spinor, SU3.anti_triplet + SU2.singlet, [-2/3], Statistics.FERMION,
     1.5
 )
 
 d = Field(
-    'd', R_spinor, SU3_triplet + SU2_singlet, [-1/3], Statistics.FERMION, 1.5
+    'd', R_spinor, SU3.triplet + SU2.singlet, [-1/3], Statistics.FERMION, 1.5
 )
 dc = Field(
-    'dc', L_spinor, SU3_antitriplet + SU2_singlet, [1/3], Statistics.FERMION,
+    'dc', L_spinor, SU3.anti_triplet + SU2.singlet, [1/3], Statistics.FERMION,
     1.5
 )
 
 l = Field(
-    'l', L_spinor, SU3_singlet + SU2_doublet, [-1/2], Statistics.FERMION, 1.5
+    'l', L_spinor, SU3.singlet + SU2.doublet, [-1/2], Statistics.FERMION, 1.5
 )
 lc = Field(
-    'lc', R_spinor, SU3_singlet + SU2_doublet, [1/2], Statistics.FERMION, 1.5
+    'lc', R_spinor, SU3.singlet + SU2.doublet, [1/2], Statistics.FERMION, 1.5
 )
 
 e = Field(
-    'e', R_spinor, SU3_singlet + SU2_singlet, [-1], Statistics.FERMION, 1.5
+    'e', R_spinor, SU3.singlet + SU2.singlet, [-1], Statistics.FERMION, 1.5
 )
 ec = Field(
-    'ec', L_spinor, SU3_singlet + SU2_singlet, [1], Statistics.FERMION, 1.5
+    'ec', L_spinor, SU3.singlet + SU2.singlet, [1], Statistics.FERMION, 1.5
 )
 
 phi = Field(
-    'phi', scalar, SU3_singlet + SU2_doublet, [1/2], Statistics.BOSON, 1
+    'phi', scalar, SU3.singlet + SU2.doublet, [1/2], Statistics.BOSON, 1
 )
 phic = Field(
-    'phic', scalar, SU3_singlet + SU2_doublet, [-1/2], Statistics.BOSON, 1
+    'phic', scalar, SU3.singlet + SU2.doublet, [-1/2], Statistics.BOSON, 1
 )
 
 bL = Field(
-    'bL', L_tensor, SU3_singlet + SU2_singlet, [0], Statistics.BOSON, 2
+    'bL', L_tensor, SU3.singlet + SU2.singlet, [0], Statistics.BOSON, 2
 )
 bR = Field(
-    'bR', R_tensor, SU3_singlet + SU2_singlet, [0], Statistics.BOSON, 2
+    'bR', R_tensor, SU3.singlet + SU2.singlet, [0], Statistics.BOSON, 2
 )
 
 wL = Field(
-    'wL', L_tensor, SU3_singlet + SU2_triplet, [0], Statistics.BOSON, 2
+    'wL', L_tensor, SU3.singlet + SU2.triplet, [0], Statistics.BOSON, 2
 )
 wR = Field(
-    'wR', R_tensor, SU3_singlet + SU2_triplet, [0], Statistics.BOSON, 2
+    'wR', R_tensor, SU3.singlet + SU2.triplet, [0], Statistics.BOSON, 2
 )
 
 gL = Field(
-    'gL', L_tensor, SU3_octet + SU2_singlet, [0], Statistics.BOSON, 2
+    'gL', L_tensor, SU3.octet + SU2.singlet, [0], Statistics.BOSON, 2
 )
 gR = Field(
-    'gR', R_tensor, SU3_octet + SU2_singlet, [0], Statistics.BOSON, 2
+    'gR', R_tensor, SU3.octet + SU2.singlet, [0], Statistics.BOSON, 2
 )
 
 SM_fields = [
-    q, qc,
-    u, uc, d, dc,
-    l, lc,
-    e, ec,
-    phi, phic,
-    bL, bR, wL, wR, gL, gR
+    q, qc, u, uc, d, dc, l, lc, e, ec,
+    bL, bR, wL, wR, gL, gR, phi, phic
 ]
 
 SMEFT = EFT(SM_algebra, SM_fields)
 
-if __name__ == "__main__":
-    print(SMEFT.invariants(6))
+if __name__ == '__main__':
+    argument_parser = argparse.ArgumentParser(
+        description="Compute bases for the SMEFT"
+    )
+
+    argument_parser.add_argument(
+        '--dimension',
+        type=int,
+        metavar='D',
+        default=6,
+        help='maximum dimension for the operators'
+    )
+
+    argument_parser.add_argument(
+        '--profile',
+        action='store_const',
+        const=True,
+        default=False
+    )
+
+    arguments = argument_parser.parse_args()
+
+    if arguments.profile:
+        profiler = cProfile.Profile()
+        profiler.enable()
+    
+    invariants = SMEFT.invariants(arguments.dimension)
+
+    if arguments.profile:
+        profiler.disable()
+    
+    print("Number of invariants: {}".format(
+        sum(
+            count
+            for counter in invariants.values()
+            for count in counter.values()
+        )
+    ))
+
+    print(EFT.show_invariants(invariants))
+
+    if arguments.profile:
+        profiler.print_stats(sort='time')

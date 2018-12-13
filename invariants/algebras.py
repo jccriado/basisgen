@@ -7,6 +7,8 @@ import enum
 import functools
 import itertools
 import re
+import operator
+import numpy as np
 
 
 class Series(enum.Enum):
@@ -28,13 +30,7 @@ class Algebra(metaclass=abc.ABCMeta):
         pass
 
     def height(self, weight):
-        return sum(
-            level_vector_component * weight_component
-            for level_vector_component, weight_component in zip(
-                    self.level_vector,
-                    weight
-            )
-        )
+        return sum(map(operator.mul, self.level_vector, weight))
 
 
 class SimpleAlgebra(Algebra):
@@ -69,27 +65,10 @@ class SimpleAlgebra(Algebra):
     def __add__(self, other):
         return self._to_semisimple() + other._to_semisimple()
 
-    @staticmethod
-    def from_string(string):
-        match = re.match(r'(?P<series>[ABCDEFG])(?P<rank>[0-9]+)', string)
-
-        series = {
-            'A': Series.A,
-            'B': Series.B,
-            'C': Series.C,
-            'D': Series.D,
-            'E': Series.E,
-            'F': Series.F,
-            'G': Series.G
-        }[match.group('series')]
-
-        return SimpleAlgebra(series, int(match.group('rank')))
-
     def _to_semisimple(self):
         return SemisimpleAlgebra([self])
 
     @property
-    @functools.lru_cache(maxsize=None)
     def cartan_matrix(self):
         def default_element(i, j):
             return {0: 2, 1: -1}.get(abs(i - j), 0)
@@ -252,9 +231,6 @@ class SemisimpleAlgebra(collections.Iterable, Algebra):
         self.rank = sum(
             simple_algebra.rank for simple_algebra in simple_algebras
         )
-
-        if isinstance(self.simple_algebras[0], list):
-            raise Exception(str(self.simple_algebras))
 
     def __str__(self):
         return " + ".join(map(str, self.simple_algebras))

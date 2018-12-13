@@ -1,3 +1,7 @@
+import functools
+import operator
+
+
 class Weight(object):
     def __init__(self, components):
         self.components = tuple(components)
@@ -16,13 +20,13 @@ class Weight(object):
         return self.components == other.components
 
     def __add__(self, other):
-        return Weight(tuple(x + y for x, y in zip(self, other)))
+        return Weight(x + y for x, y in zip(self, other))
 
     def __neg__(self):
-        return Weight(tuple(-x for x in self))
+        return Weight(-x for x in self)
 
     def __sub__(self, other):
-        return self + (-other)
+        return Weight(x - y for x, y in zip(self, other))
 
     def __mul__(self, other):
         return Weight(tuple(other * x for x in self))
@@ -40,7 +44,3 @@ class Weight(object):
 
     def __len__(self):
         return len(self.components)
-
-    @staticmethod
-    def from_string(weight_str):
-        return Weight(tuple(map(int, weight_str.split())))

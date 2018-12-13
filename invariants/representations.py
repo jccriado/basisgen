@@ -8,6 +8,10 @@ import itertools
 import functools
 
 
+class OrderedCounter(collections.Counter, collections.OrderedDict):
+    pass
+
+
 class Representation(object):
     def __init__(self, weights):
         self.weights = weights
@@ -33,20 +37,47 @@ class Representation(object):
 
     @functools.lru_cache(maxsize=None)
     def decompose(self, algebra):
-        remaining_weights = copy.copy(self.weights)
-        irreps = []
+        def _item_height(item):
+            return algebra.height(item[0])
+
+        remaining_weights = OrderedCounter(collections.OrderedDict(
+            sorted(
+                self.weights.items(),
+                key=_item_height,
+                reverse=False
+            )
+        ))
+
+        irreps = collections.Counter()
 
         while remaining_weights:
-            highest_weight = Representation(
-                remaining_weights
-            ).highest_weight(algebra)
-
+            highest_weight, multiplicity = remaining_weights.popitem()
             current_irrep = Irrep(algebra, highest_weight)
-            irreps.append(current_irrep)
+            irreps[current_irrep] += multiplicity
 
-            remaining_weights -= current_irrep.representation.weights
+            remaining_weights[highest_weight] = multiplicity
+            remaining_weights -= collections.Counter({
+                weight: count * multiplicity
+                for weight, count in
+                current_irrep.representation.weights.items()
+            })
 
         return irreps
+
+        # remaining_weights = copy.copy(self.weights)
+        # irreps = []
+
+        # while remaining_weights:
+        #     highest_weight = Representation(
+        #         remaining_weights
+        #     ).highest_weight(algebra)
+
+        #     current_irrep = Irrep(algebra, highest_weight)
+        #     irreps.append(current_irrep)
+
+        #     remaining_weights -= current_irrep.representation.weights
+
+        # return irreps
 
 
 class Irrep(object):
@@ -75,8 +106,8 @@ class Irrep(object):
 
     def __eq__(self, other):
         return (
-            self.algebra == other.algebra
-            and tuple(self.highest_weight) == tuple(other.highest_weight)
+            tuple(self.highest_weight) == tuple(other.highest_weight)
+            and self.algebra == other.algebra
         )
 
     @functools.lru_cache(maxsize=None)
@@ -85,7 +116,13 @@ class Irrep(object):
             product_representation = self.representation * other.representation
             return product_representation.decompose(self.algebra)
         else:
-            return Irrep.product([self], other)
+            return Irrep.product(collections.Counter([self]), other)
+
+        # if isinstance(other, Irrep):
+        #     product_representation = self.representation * other.representation
+        #     return product_representation.decompose(self.algebra)
+        # else:
+        #     return Irrep.product([self], other)
 
     __rmul__ = __mul__
 
@@ -102,14 +139,28 @@ class Irrep(object):
         return Irrep(algebra, Weight([0] * algebra.rank))
 
     @staticmethod
-    def product(first_irrep_list, second_irrep_list):
-        return list(
-            itertools.chain.from_iterable([
-                first_irrep * second_irrep
-                for first_irrep in first_irrep_list
-                for second_irrep in second_irrep_list
-            ])
+    def product(first_irrep_counter, second_irrep_counter):
+        return sum(
+            (
+                collections.Counter({
+                    irrep: count * first_count * second_count
+                    for irrep, count in (first_irrep * second_irrep).items()
+                })
+                for first_irrep, first_count in first_irrep_counter.items()
+                for second_irrep, second_count in second_irrep_counter.items()
+            ),
+            collections.Counter()
         )
+
+    # @staticmethod
+    # def product(first_irrep_list, second_irrep_list):
+        # return list(
+        #     itertools.chain.from_iterable([
+        #         first_irrep * second_irrep
+        #         for first_irrep in first_irrep_list
+        #         for second_irrep in second_irrep_list
+        #     ])
+        # )
 
     def _child_weights(self, weight, level):
         return MultivaluedMap.from_pairs(

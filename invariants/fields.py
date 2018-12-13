@@ -1,6 +1,9 @@
 from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
 from invariants.representations import Irrep
 from invariants.statistics import Statistics
+from invariants.parsing import (
+    parse_weight, parse_lorentz_highest_weight, parse_statistics
+)
 from invariants.weights import Weight
 
 from collections import Counter
@@ -65,6 +68,32 @@ class Field(object):
 
     def _to_operator(self):
         return Operator(Counter([self]))
+
+    @staticmethod
+    def from_dict(name, internal_algebra, input_dictionary):
+        def parse(key, value):
+            if key == 'lorentz_irrep':
+                return Irrep(
+                    _lorentz_algebra,
+                    parse_lorentz_highest_weight(value)
+                )
+
+            elif key == 'internal_irrep':
+                return Irrep(internal_algebra, parse_weight(value))
+
+            elif key == 'statistics':
+                return parse_statistics(value)
+
+            else:
+                return value
+
+        parsed_dict = {
+            key: parse(key, value)
+            for key, value in input_dictionary.items()
+        }
+        parsed_dict.update({'name': name})
+
+        return Field(**parsed_dict)
 
     @property
     def irrep(self):
@@ -149,7 +178,10 @@ class Operator(object):
     @property
     def is_neutral(self):
         # TODO: fix rounding errors
-        return all(math.isclose(charge, 0) for charge in self.charges)
+        return all(
+            math.isclose(charge, 0, abs_tol=1e-05)
+            for charge in self.charges
+        )
 
     @property
     def irreps(self):
@@ -158,7 +190,7 @@ class Operator(object):
             for field, exponent in self.content.items()
         )
 
-        return Counter(functools.reduce(Irrep.product, power_irreps))
+        return functools.reduce(Irrep.product, power_irreps)
 
     @property
     def derivatives(self):
@@ -270,34 +302,34 @@ class EFT(object):
 
     def invariants(self, max_dimension):
         result = {}
+
+        print("Computing field content combinations... ", end="", flush=True)
         operators = list(self.operators(max_dimension))
         total = len(operators)
+        spaces = " " * (round(math.log(total, 10)) + 1)
+        print("done.")
 
-        print("Computing invariants...")
-        print("[", end="", flush=True)
+        print(f"Computing invariants... (0/{total}", end="\r", flush=True)
 
         for progress, operator in enumerate(operators):
             if progress % round(total / 50) == 0:
-                print("=", end="", flush=True)
+                print(
+                    f"Computing invariants ({progress}/{total})" + spaces,
+                    end="\r",
+                    flush=True
+                )
 
             if operator.content and operator.is_neutral:
                 result[operator] = operator.invariants(max_dimension)
 
-        print("]")
-
+        print(f"Computing invariants... done." + spaces, flush=True)
         return result
 
-        # return {
-        #     operator: operator.invariants(max_dimension)
-        #     for operator in self.operators(max_dimension)
-        #     if operator.content and operator.is_neutral
-        # }
-
     @staticmethod
-    def show_invariants(invariants):
-        return "\n".join(
-            "{count} {operator}{derivatives}".format(
-                count=count,
+    def show_invariants(invariants, by_lines=False):
+        return ("\n" if by_lines else " + ").join(
+            "{count}{operator}{derivatives}".format(
+                count=str(count) + " " if count > 1 or by_lines else "",
                 operator=operator,
                 derivatives="" if number_of_derivatives == 0 else (
                     " D" if number_of_derivatives == 1 else
@@ -308,191 +340,13 @@ class EFT(object):
             for number_of_derivatives, count in current_invariants.items()
         )
 
-                
-            
-        
-# class Operator(object):
-#     show_irrep = False
+    @staticmethod
+    def from_dict(input_dict):
+        return EFT(
+            input_dict['algebra'],
+            [
+                Field.from_dict(name, input_dict['algebra'], field_dict)
+                for name, field_dict in input_dict['fields'].items()
+            ]
+        )
 
-#     def __init__(self, ):
-#         self.field_content = field_content
-
-#     def __eq__(self, other):
-#         return (
-#             self.field_content == other.field_content
-#             and self.lorentz_irrep == other.lorentz_irrep
-#             and self.internal_irrep == other.internal_irrep
-#         )
-
-#     def __hash__(self):
-#         return hash((
-#             frozenset(self.field_content),
-#             self.lorentz_irrep,
-#             self.internal_irrep
-#         ))
-
-#     def __str__(self):
-#         if len(self.field_content) == 0:
-#             content = "1"
-#         else:
-#             content = " ".join(
-#                 f"{field}^{exponent}" if exponent > 1 else f"{field}"
-#                 for field, exponent in self.field_content.items()
-#             )
-
-#         if Operator.show_irrep:
-#             return f"({content}: ({self.lorentz_irrep}, {self.internal_irrep}))"
-#         else:
-#             return content
-
-#     __repr__ = __str__
-
-#     @staticmethod
-#     def _generate(field_content, irreps):
-#         return Counter({
-#             Operator(
-#                 field_content,
-#                 irrep.split(2)[0],
-#                 irrep.split(2)[1]
-#             ):
-#             count
-#             for irrep, count in irreps.items()
-#         })
-
-#     @property
-#     def charges(self):
-#         return [
-#             sum(charges) for charges in zip(*[
-#                 [
-#                     charge * self.field_content[field]
-#                     for charge in field.charges
-#                 ]
-#                 for field in self.field_content
-#             ])
-#         ]
-
-#     @property
-#     def dimension(self):
-#         return sum(
-#             field.dimension * self.field_content[field]
-#             for field in self.field_content
-#         )
-
-#     @property
-#     def is_invariant(self):
-#         return (
-#             all(charge == 0 for charge in self.charges)
-#             and all(component == 0 for component in self.irrep.highest_weight)
-#         )            
-
-
-
-
-#     @property
-#     def _singlet(self):
-#         return Irrep.singlet(self.algebra)
-
-#     def covariants(self, max_dimension):
-#         operators = collections.Counter()
-
-#         for field_content in EFT._combinations(self.fields, max_dimension):
-#             powers = (
-#                 field.irrep.power(exponent, field.statistics)
-#                 for field, exponent in field_content.items()
-#             )
-
-#             irreps = functools.reduce(Irrep.product, powers, [self._singlet])
-
-#             for irrep, count in collections.Counter(irreps).items():
-#                 operators[Operator(field_content, irrep)] += count
-
-#         return operators
-
-#     @staticmethod
-#     def _filter_invariants(operators):
-#         return collections.Counter({
-#             operator: count
-#             for operator, count in operators.items()
-#             if operator.is_invariant
-#         })
-
-#     def invariants(self, max_dimension):
-#         return EFT._filter_invariants(
-#             self.covariants(max_dimension)
-#         )
-
-# def differentiate_content(field_content):
-#     out_contents = set()
-#     for field in field_content:
-#         out_content = field_content.clone()
-
-#         out_content.add(field, -1)
-#         out_content.add(field.derivative(), 1)
-
-#         out_contents.add(out_content)
-
-#     return out_contents
-
-
-# def differentiate(algebra, operator):
-#     vector_singlet = Irrep(algebra, Weight([1, 1] + [0] * algebra.rank))
-
-#     return {
-#         Operator(new_content, new_irrep)
-#         for new_content in differentiate_content(operator.field_content)
-#         for new_irrep in operator.irrep * vector_singlet
-#     }
-
-
-# def remove_one(dictionary):
-#     for key in dictionary:
-#         dictionary[key]
-
-
-# def invariants_with_derivatives(algebra, field, max_dimension):
-#     initial_operators = operators(algebra, field, max_dimension)
-#     current_operators = initial_operators
-
-#     all_invariants = filter_invariants(initial_operators)
-
-#     for initial_operator in initial_operators:
-#         current_operators = {initial_operator}
-
-#         for number_of_derivatives in range(1, max_dimension):
-#             # correct_irrep = (
-#             #     initial_operator.irrep.highest_weight[:2]
-#             #     == [number_of_derivatives, number_of_derivatives]
-#             # )
-#             # if not correct_irrep:
-#             #     continue
-            
-#             current_operators = set(
-#                 itertools.chain.from_iterable(
-#                     differentiate(algebra, operator)
-#                     for operator in current_operators
-#                     if operator.dimension + 1 <= max_dimension
-#                 )
-#             )
-
-#             new_invariants = {
-#                 operator for operator in current_operators
-#                 if operator.is_invariant()
-#             }
-
-#             for _ in range(number_of_derivatives):
-#                 if new_invariants:
-#                     new_invariants.pop()
-
-#             all_invariants.update({
-#                 operator.field_content: initial_operators[initial_operator]
-#                 for operator in new_invariants
-#             })
-
-#     return all_invariants
-
-
-def hilbert_series_str(operators):
-    return " + ".join([
-        f"{count} {op}" if count > 1 else str(op)
-        for op, count in operators.items()
-    ])

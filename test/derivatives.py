@@ -46,7 +46,7 @@ Operator.show_irrep = True
 #pr = cProfile.Profile()
 #pr.enable()
 
-invariants = SMEFT.invariants(6)
+invariants = SMEFT.invariants(9)
 
 #pr.disable()
 #pr.print_stats(sort='time')
