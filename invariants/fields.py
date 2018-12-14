@@ -1,10 +1,7 @@
 from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.lorentz import algebra as lorentz_algebra
+from invariants.shortcuts import lorentz_algebra
 from invariants.representations import Irrep
 from invariants.statistics import Statistics
-from invariants.parsing import (
-    parse_weight, parse_lorentz_highest_weight, parse_statistics
-)
 from invariants.partitions import partitions
 from invariants.weights import Weight
 
@@ -72,32 +69,6 @@ class Field(object):
 
     def _to_operator(self):
         return Operator(Counter([self]))
-
-    @staticmethod
-    def from_dict(name, internal_algebra, input_dictionary):
-        def parse(key, value):
-            if key == 'lorentz_irrep':
-                return Irrep(
-                    _lorentz_algebra,
-                    parse_lorentz_highest_weight(value)
-                )
-
-            elif key == 'internal_irrep':
-                return Irrep(internal_algebra, parse_weight(value))
-
-            elif key == 'statistics':
-                return parse_statistics(value)
-
-            else:
-                return value
-
-        parsed_dict = {
-            key: parse(key, value)
-            for key, value in input_dictionary.items()
-        }
-        parsed_dict.update({'name': name})
-
-        return Field(**parsed_dict)
 
     @property
     def irrep(self):

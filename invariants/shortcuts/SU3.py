@@ -3,19 +3,19 @@ from invariants.representations import Irrep
 from invariants.weights import Weight
 
 
-algebra = SimpleAlgebra(Series.A, 2)
+SU3_algebra = SimpleAlgebra(Series.A, 2)
 
 name_irrep_table = [
-    ('1', Irrep(algebra, Weight([0, 0]))),
-    ('3', Irrep(algebra, Weight([1, 0]))),
-    ('6', Irrep(algebra, Weight([2, 0]))),
-    ('8', Irrep(algebra, Weight([1, 1]))),
-    ('10', Irrep(algebra, Weight([3, 0]))),
-    ('15', Irrep(algebra, Weight([2, 1]))),
-    ("15'", Irrep(algebra, Weight([4, 0]))),
-    ('21', Irrep(algebra, Weight([0, 5]))),
-    ('24', Irrep(algebra, Weight([1, 3]))),
-    ('27', Irrep(algebra, Weight([2, 2])))
+    ('1', Irrep(SU3_algebra, Weight([0, 0]))),
+    ('3', Irrep(SU3_algebra, Weight([1, 0]))),
+    ('6', Irrep(SU3_algebra, Weight([2, 0]))),
+    ('8', Irrep(SU3_algebra, Weight([1, 1]))),
+    ('10', Irrep(SU3_algebra, Weight([3, 0]))),
+    ('15', Irrep(SU3_algebra, Weight([2, 1]))),
+    ("15'", Irrep(SU3_algebra, Weight([4, 0]))),
+    ('21', Irrep(SU3_algebra, Weight([0, 5]))),
+    ('24', Irrep(SU3_algebra, Weight([1, 3]))),
+    ('27', Irrep(SU3_algebra, Weight([2, 2])))
 ]
 
 
@@ -27,7 +27,7 @@ def SU3_irrep(n, m=None):
         else:
             return dict(name_irrep_table)[n]
     else:
-        return Irrep(algebra, Weight([n, m]))
+        return Irrep(SU3_algebra, Weight([n, m]))
 
 
 def SU3_name(irrep):
@@ -50,9 +50,9 @@ def SU3_show(irreps):
     )
 
 
-singlet = SU3_irrep(0, 0)
-triplet = SU3_irrep(1, 0)
-anti_triplet = SU3_irrep(0, 1)
-octet = SU3_irrep(1, 1)
-sextet = SU3_irrep(2, 0)
-anti_sextet = SU3_irrep(0, 2)
+SU3_singlet = SU3_irrep(0, 0)
+SU3_triplet = SU3_irrep(1, 0)
+SU3_anti_triplet = SU3_irrep(0, 1)
+SU3_octet = SU3_irrep(1, 1)
+SU3_sextet = SU3_irrep(2, 0)
+SU3_anti_sextet = SU3_irrep(0, 2)

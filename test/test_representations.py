@@ -1,6 +1,6 @@
 from invariants.algebras import Series, SimpleAlgebra
 from invariants.representations import Irrep
-from invariants.SU3 import SU3_irrep
+from invariants.shortcuts import SU3_irrep
 from invariants.weights import Weight
 
 import unittest

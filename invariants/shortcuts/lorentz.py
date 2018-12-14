@@ -3,14 +3,14 @@ from invariants.representations import Irrep
 from invariants.weights import Weight
 
 
-algebra = SemisimpleAlgebra([
+lorentz_algebra = SemisimpleAlgebra([
     SimpleAlgebra(Series.A, 1),
     SimpleAlgebra(Series.A, 1)
 ])
 
 
 def lorentz_irrep(n, m):
-    return Irrep(algebra, Weight([round(2*n), round(2*m)]))
+    return Irrep(lorentz_algebra, Weight([round(2*n), round(2*m)]))
 
 
 scalar = lorentz_irrep(0, 0)

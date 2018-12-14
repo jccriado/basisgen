@@ -1,5 +1,5 @@
 from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.parsing import (
+from invariants.shortcuts.parsing import (
     parse_weight, parse_algebra, parse_lorentz_highest_weight
 )
 from invariants.weights import Weight

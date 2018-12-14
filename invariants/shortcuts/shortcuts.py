@@ -1,5 +1,5 @@
 from invariants.representations import Irrep
-from invariants.parsing import parse_algebra, parse_weight
+from invariants.shortcuts.parsing import parse_algebra, parse_weight
 
 algebra = parse_algebra
 
