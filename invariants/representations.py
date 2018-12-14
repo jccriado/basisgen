@@ -1,14 +1,10 @@
 from invariants.weights import Weight
 from invariants.statistics import Statistics
-from invariants.multimap import MultivaluedMap
+from invariants.containers import MultivaluedMap, OrderedCounter
 
 import collections
 import itertools
 import functools
-
-
-class OrderedCounter(collections.Counter, collections.OrderedDict):
-    pass
 
 
 class Representation(object):

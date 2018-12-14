@@ -16,3 +16,7 @@ class MultivaluedMap(collections.defaultdict):
     def update(self, other):
         for key, value in other.items():
             self[key].update(value)
+
+
+class OrderedCounter(collections.Counter, collections.OrderedDict):
+    pass
