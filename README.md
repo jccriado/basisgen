@@ -12,3 +12,8 @@ theories:
 - Find the number of invariants with a given field content.
 - Compute bases of operators taking into account integration by parts and
   (optionally) the use of equations of motion.
+
+
+## Requirements
+
+- Python 3.6
