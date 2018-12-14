@@ -1,7 +1,3 @@
-import functools
-import operator
-
-
 class Weight(object):
     def __init__(self, components):
         self.components = tuple(components)

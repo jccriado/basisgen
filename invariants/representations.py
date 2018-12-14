@@ -5,7 +5,6 @@ from invariants.multimap import MultivaluedMap
 import collections
 import itertools
 import functools
-import operator
 
 
 class OrderedCounter(collections.Counter, collections.OrderedDict):
@@ -63,28 +62,11 @@ class Representation(object):
 
         return irreps
 
-        # remaining_weights = copy.copy(self.weights)
-        # irreps = []
-
-        # while remaining_weights:
-        #     highest_weight = Representation(
-        #         remaining_weights
-        #     ).highest_weight(algebra)
-
-        #     current_irrep = Irrep(algebra, highest_weight)
-        #     irreps.append(current_irrep)
-
-        #     remaining_weights -= current_irrep.representation.weights
-
-        # return irreps
-
 
 class Irrep(object):
     def __init__(self, algebra, highest_weight):
         self.algebra = algebra
         self.highest_weight = highest_weight
-        #if isinstance(self.algebra, list):
-         #   raise Exception(str(algebra))
 
     def __str__(self):
         return "Irrep({algebra}, {highest_weight})".format(
@@ -129,7 +111,7 @@ class Irrep(object):
                 )
 
                 out = collections.Counter()
-                
+
                 for combination in itertools.product(*(
                         (self_irrep * other_irrep).items()
                         for self_irrep, other_irrep
@@ -153,18 +135,6 @@ class Irrep(object):
                 return product_representation.decompose(self.algebra)
         else:
             return Irrep.product(collections.Counter([self]), other)
-        
-        # if isinstance(other, Irrep):
-        #     product_representation = self.representation * other.representation
-        #     return product_representation.decompose(self.algebra)
-        # else:
-        #     return Irrep.product(collections.Counter([self]), other)
-
-        # if isinstance(other, Irrep):
-        #     product_representation = self.representation * other.representation
-        #     return product_representation.decompose(self.algebra)
-        # else:
-        #     return Irrep.product([self], other)
 
     __rmul__ = __mul__
 
@@ -299,45 +269,3 @@ class Irrep(object):
         ])
 
         return Representation(power_weights).decompose(self.algebra)
-
-
-    # def _weight_multiplicity(self, level, weight, previous_multiplicities):
-    #     if level == 0:
-    #         return 1
-
-    #     delta = self.algebra.sum_of_positive_roots
-
-    #     weight = np.array(weight.components)
-    #     positive_roots = np.array(self.algebra.positive_roots)
-    #     k_values = np.array(range(1, level + 1))
-    #     metric = np.array(self.algebra.metric)
-
-    #     weights_plus_k_alpha = (
-    #         weight[np.newaxis, np.newaxis, ...]
-    #         + positive_roots[np.newaxis, ...]
-    #         * k_values[..., np.newaxis, np.newaxis]
-    #     )
-
-    #     scalar_products = np.einsum(
-    #         'ijk,kl,jl->ij',
-    #         weights_plus_k_alpha,
-    #         metric,
-    #         positive_roots,
-    #         optimize=True
-    #     )
-
-    #     numerator = 2 * sum(
-    #         previous_multiplicities.get(Weight(list(weight_plus_k_alpha)), 0)
-    #         * scalar_product
-    #         for scalar_product, weight_plus_k_alpha in zip(
-    #                 scalar_products.reshape((-1,)),
-    #                 weights_plus_k_alpha.reshape((-1, len(weight)))
-    #         )
-    #     )
-
-    #     denominator = (
-    #         self.algebra.norm_squared(self.highest_weight + delta)
-    #         - self.algebra.norm_squared(Weight(list(weight)) + delta)
-    #     )
-
-    #     return int(round(numerator / denominator))

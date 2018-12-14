@@ -1,6 +1,4 @@
 from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.fields import Field
-from invariants.statistics import Statistics
 from invariants.parsing import (
     parse_weight, parse_algebra, parse_lorentz_highest_weight
 )
