@@ -237,7 +237,7 @@ class Operator(object):
             for number_of_derivatives in range(1, max_derivatives + 1)
         }
 
-    def invariants(self, max_dimension):
+    def invariants(self, max_dimension, ignore_lower_dimensions=False):
         singlets = self.internal_singlets(max_dimension)
 
         for derivative_count in range(int(max_dimension - self.dimension)):
@@ -257,11 +257,16 @@ class Operator(object):
 
         result = {}
         for number_of_derivatives, counter in singlets.items():
-            total = sum(
-                count for irrep, count in counter.items() if irrep.is_singlet
-            )
-            if total > 0:
-                result[number_of_derivatives] = total
+            if (
+                    not ignore_lower_dimensions
+                    or number_of_derivatives == max_dimension - self.dimension
+            ):
+                total = sum(
+                    count
+                    for irrep, count in counter.items() if irrep.is_singlet
+                )
+                if total > 0:
+                    result[number_of_derivatives] = total
 
         return result
 
@@ -298,7 +303,7 @@ class EFT(object):
             self._operators(max_dimension)
         )
 
-    def _invariants(self, max_dimension, verbose):
+    def _invariants(self, max_dimension, verbose, ignore_lower_dimension):
         result = {}
 
         if verbose:
@@ -312,7 +317,7 @@ class EFT(object):
 
         if verbose:
             print("done.")
-            print(f"Computing invariants... (0/{total}", end="\r", flush=True)
+            print(f"Computing invariants... (0/{total})", end="\r", flush=True)
 
         for progress, operator in enumerate(operators):
             if verbose and progress % round(total / 50) == 0:
@@ -323,21 +328,54 @@ class EFT(object):
                 )
 
             if operator.content and operator.is_neutral:
-                result[operator] = operator.invariants(max_dimension)
+                result[operator] = operator.invariants(
+                    max_dimension,
+                    ignore_lower_dimension
+                )
 
         if verbose:
-            print(f"Computing invariants... done." + spaces, flush=True)
+            print(f"Computing invariants... done." + spaces * 2, flush=True)
 
         return result
 
-    def invariants(self, max_dimension, verbose=False):
+    def invariants(
+            self,
+            max_dimension,
+            verbose=False,
+            ignore_lower_dimension=False
+    ):
         return self.cached_results.setdefault(
             ('invariants', max_dimension),
-            self._invariants(max_dimension, verbose)
+            self._invariants(max_dimension, verbose, ignore_lower_dimension)
         )
 
     @staticmethod
-    def show_invariants(invariants, by_lines=False):
+    def show_invariants(invariants, by_lines=False, classes=None):
+        if classes is None:
+            contents = invariants
+        else:
+            def power_str(item):
+                field, exponent = item
+                if exponent == 1:
+                    return str(field)
+                else:
+                    return f"({field})^{exponent}"
+
+            contents = {}
+            for operator, ders in invariants.items():
+                content = " ".join(map(
+                    power_str,
+                    sum(
+                            (
+                                Counter({classes[field]: exponent})
+                                for field, exponent in operator.content.items()
+                            ),
+                            Counter()
+                    ).items()
+                ))
+                contents.setdefault(content, Counter())
+                contents[content] += ders
+
         return ("\n" if by_lines else " + ").join(
             "{count}{operator}{derivatives}".format(
                 count=str(count) + " " if count > 1 or by_lines else "",
@@ -347,7 +385,7 @@ class EFT(object):
                     f" D^{number_of_derivatives}"
                 )
             )
-            for operator, current_invariants in invariants.items()
+            for operator, current_invariants in contents.items()
             for number_of_derivatives, count in current_invariants.items()
         )
 

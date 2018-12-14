@@ -102,17 +102,17 @@ class Irrep(object):
     @staticmethod
     @functools.lru_cache(maxsize=None)
     def _mul_semisimple_irreps(first, second):
-        first_irreps = map(
+        first_irreps = list(map(
             Irrep,
             first.algebra.simple_algebras,
             first.algebra.split_weight(first.highest_weight)
-        )
+        ))
 
-        second_irreps = map(
+        second_irreps = list(map(
             Irrep,
             second.algebra.simple_algebras,
             second.algebra.split_weight(second.highest_weight)
-        )
+        ))
 
         out = collections.Counter()
 
@@ -125,7 +125,7 @@ class Irrep(object):
             count = combination[0][1]
             for inner_irrep, inner_count in combination[1:]:
                 irrep += inner_irrep
-                inner_count *= inner_count
+                count *= inner_count
 
             out += collections.Counter({irrep: count})
 
@@ -134,10 +134,7 @@ class Irrep(object):
     @staticmethod
     @functools.lru_cache(maxsize=None)
     def _mul_simple_irreps(first, second):
-        product_representation = (
-            first.representation * second.representation
-        )
-
+        product_representation = first.representation * second.representation
         return product_representation.decompose(first.algebra)
 
     def __mul__(self, other):
