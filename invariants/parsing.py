@@ -92,4 +92,3 @@ def parse_algebra(code):
             return _parse_simple_algebra(code)
         except Exception:
             return _parse_simple_group(code)
-

@@ -83,38 +83,6 @@ class TestParsing(unittest.TestCase):
             Weight([3, 2])
         )
 
-    def test_fields(self):
-        phi_dict = {
-            'lorentz_irrep': 'scalar',
-            'internal_irrep': '0 0 1',
-            'charges': [1/2],
-            'statistics': 'boson',
-            'dimension': 1
-        }
-        phi = Field.from_dict('phi', parse_algebra('SU3xSU2'), phi_dict)
-
-        self.assertEqual(phi.name, 'phi')
-
-        self.assertEqual(
-            phi.internal_irrep.algebra,
-            SemisimpleAlgebra([
-                SimpleAlgebra(Series.A, 2),
-                SimpleAlgebra(Series.A, 1)
-            ])
-        )
-
-        self.assertEqual(phi.lorentz_irrep.highest_weight, Weight([0, 0]))
-
-        self.assertEqual(phi.internal_irrep.highest_weight, Weight([0, 0, 1]))
-
-        self.assertEqual(phi.charges, [1/2])
-
-        self.assertEqual(phi.statistics, Statistics.BOSON)
-
-        self.assertEqual(phi.dimension, 1)
-
-        self.assertEqual(phi.number_of_derivatives, 0)
-
 
 if __name__ == '__main__':
     unittest.main()

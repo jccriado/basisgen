@@ -1,9 +1,11 @@
 from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
+from invariants.lorentz import algebra as lorentz_algebra
 from invariants.representations import Irrep
 from invariants.statistics import Statistics
 from invariants.parsing import (
     parse_weight, parse_lorentz_highest_weight, parse_statistics
 )
+from invariants.partitions import partitions
 from invariants.weights import Weight
 
 from collections import Counter
@@ -30,7 +32,8 @@ class Field(object):
             charges,
             statistics,
             dimension,
-            number_of_derivatives=0
+            number_of_derivatives=0,
+            number_of_flavors=1,
     ):
         self.name = name
         self.lorentz_irrep = lorentz_irrep
@@ -39,6 +42,7 @@ class Field(object):
         self.statistics = statistics
         self.dimension = dimension
         self.number_of_derivatives = number_of_derivatives
+        self.number_of_flavors = number_of_flavors
 
     def __hash__(self):
         return hash(self.name)
@@ -122,7 +126,8 @@ class Field(object):
                 charges=self.charges,
                 statistics=self.statistics,
                 dimension=self.dimension+times,
-                number_of_derivatives=self.number_of_derivatives+times
+                number_of_derivatives=self.number_of_derivatives+times,
+                number_of_flavors=self.number_of_flavors
             )
             for lorentz_irrep in lorentz_irreps
         )
@@ -186,11 +191,26 @@ class Operator(object):
     @property
     def irreps(self):
         power_irreps = (
-            field.irrep.power(exponent, field.statistics)
+            [
+                [
+                    field.irrep.power(inner_exponent, field.statistics)
+                    for inner_exponent in partition
+                ]
+                for partition in partitions(exponent, field.number_of_flavors)
+            ]
             for field, exponent in self.content.items()
         )
 
-        return functools.reduce(Irrep.product, power_irreps)
+        return sum(
+            (
+                functools.reduce(
+                    Irrep.product,
+                    itertools.chain.from_iterable(power_irreps_instance)
+                )
+                for power_irreps_instance in itertools.product(*power_irreps)
+            ),
+            Counter()
+        )
 
     @property
     def derivatives(self):
@@ -276,10 +296,11 @@ class Operator(object):
 
 
 class EFT(object):
-    def __init__(self, algebra, fields, use_eom=False):
-        self.algebra = algebra
+    def __init__(self, internal_algebra, fields, use_eom=False):
+        self.algebra = lorentz_algebra + internal_algebra
         self.fields = fields
         self.use_eom = use_eom
+        self.cached_results = {}
 
     @staticmethod
     def _combinations(fields, max_dimension):
@@ -297,22 +318,33 @@ class EFT(object):
             )
         ]
 
-    def operators(self, max_dimension):
+    def _operators(self, max_dimension):
         return map(Operator, EFT._combinations(self.fields, max_dimension))
 
-    def invariants(self, max_dimension):
+    def operators(self, max_dimension):
+        return self.cached_results.setdefault(
+            ('operators', max_dimension),
+            self._operators(max_dimension)
+        )
+
+    def _invariants(self, max_dimension, verbose):
         result = {}
 
-        print("Computing field content combinations... ", end="", flush=True)
+        if verbose:
+            print(
+                "Computing field content combinations... ", end="", flush=True
+            )
+
         operators = list(self.operators(max_dimension))
         total = len(operators)
         spaces = " " * (round(math.log(total, 10)) + 1)
-        print("done.")
 
-        print(f"Computing invariants... (0/{total}", end="\r", flush=True)
+        if verbose:
+            print("done.")
+            print(f"Computing invariants... (0/{total}", end="\r", flush=True)
 
         for progress, operator in enumerate(operators):
-            if progress % round(total / 50) == 0:
+            if verbose and progress % round(total / 50) == 0:
                 print(
                     f"Computing invariants ({progress}/{total})" + spaces,
                     end="\r",
@@ -322,8 +354,16 @@ class EFT(object):
             if operator.content and operator.is_neutral:
                 result[operator] = operator.invariants(max_dimension)
 
-        print(f"Computing invariants... done." + spaces, flush=True)
+        if verbose:
+            print(f"Computing invariants... done." + spaces, flush=True)
+
         return result
+
+    def invariants(self, max_dimension, verbose=False):
+        return self.cached_results.setdefault(
+            ('invariants', max_dimension),
+            self._invariants(max_dimension, verbose)
+        )
 
     @staticmethod
     def show_invariants(invariants, by_lines=False):
@@ -341,12 +381,9 @@ class EFT(object):
         )
 
     @staticmethod
-    def from_dict(input_dict):
-        return EFT(
-            input_dict['algebra'],
-            [
-                Field.from_dict(name, input_dict['algebra'], field_dict)
-                for name, field_dict in input_dict['fields'].items()
-            ]
+    def count_invariants(invariants, verbose=False):
+        return sum(
+            count
+            for counter in invariants.values()
+            for count in counter.values()
         )
-

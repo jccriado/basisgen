@@ -1,5 +1,5 @@
-from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.representations import Representation, Irrep
+from invariants.algebras import Series, SimpleAlgebra
+from invariants.representations import Irrep
 from invariants.weights import Weight
 
 import unittest

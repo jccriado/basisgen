@@ -3,9 +3,9 @@ from invariants.statistics import Statistics
 from invariants.multimap import MultivaluedMap
 
 import collections
-import copy
 import itertools
 import functools
+import operator
 
 
 class OrderedCounter(collections.Counter, collections.OrderedDict):
@@ -43,8 +43,7 @@ class Representation(object):
         remaining_weights = OrderedCounter(collections.OrderedDict(
             sorted(
                 self.weights.items(),
-                key=_item_height,
-                reverse=False
+                key=_item_height
             )
         ))
 
@@ -84,8 +83,8 @@ class Irrep(object):
     def __init__(self, algebra, highest_weight):
         self.algebra = algebra
         self.highest_weight = highest_weight
-        if isinstance(self.algebra, list):
-            raise Exception(str(algebra))
+        #if isinstance(self.algebra, list):
+         #   raise Exception(str(algebra))
 
     def __str__(self):
         return "Irrep({algebra}, {highest_weight})".format(
@@ -113,10 +112,53 @@ class Irrep(object):
     @functools.lru_cache(maxsize=None)
     def __mul__(self, other):
         if isinstance(other, Irrep):
-            product_representation = self.representation * other.representation
-            return product_representation.decompose(self.algebra)
+            if (
+                    isinstance(self.algebra, collections.Iterable)
+                    and isinstance(other.algebra, collections.Iterable)
+            ):
+                self_irreps = map(
+                    Irrep,
+                    self.algebra.simple_algebras,
+                    self.algebra.split_weight(self.highest_weight)
+                )
+
+                other_irreps = map(
+                    Irrep,
+                    other.algebra.simple_algebras,
+                    other.algebra.split_weight(other.highest_weight)
+                )
+
+                out = collections.Counter()
+                
+                for combination in itertools.product(*(
+                        (self_irrep * other_irrep).items()
+                        for self_irrep, other_irrep
+                        in zip(self_irreps, other_irreps)
+                )):
+                    irrep = combination[0][0]
+                    count = combination[0][1]
+                    for inner_irrep, inner_count in combination[1:]:
+                        irrep += inner_irrep
+                        inner_count *= inner_count
+
+                    out += collections.Counter({irrep: count})
+
+                return out
+
+            else:
+                product_representation = (
+                    self.representation * other.representation
+                )
+
+                return product_representation.decompose(self.algebra)
         else:
             return Irrep.product(collections.Counter([self]), other)
+        
+        # if isinstance(other, Irrep):
+        #     product_representation = self.representation * other.representation
+        #     return product_representation.decompose(self.algebra)
+        # else:
+        #     return Irrep.product(collections.Counter([self]), other)
 
         # if isinstance(other, Irrep):
         #     product_representation = self.representation * other.representation
@@ -236,7 +278,6 @@ class Irrep(object):
         ]))
 
     @property
-    @functools.lru_cache(maxsize=None)
     def representation(self):
         if isinstance(self.algebra, collections.Iterable):
             return self._semisimple_representation
