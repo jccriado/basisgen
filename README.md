@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/jccriado/invariants.svg?token=FCho83xJ9cZySjbkvBWS&branch=master)](https://travis-ci.com/jccriado/invariants)
+
 This is a program for computations with Lie algebra representations.
 For any semisimple Lie algebra, it can:
 - Obtain the weights (with multiplicities) of a representation given the highet
