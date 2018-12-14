@@ -203,12 +203,29 @@ def ec(number_of_flavors=1):
     )
 
 
-def smeft(number_of_flavors=1):
-    sm_fermions = [
+def sm_fermions(number_of_flavors):
+    return [
         fermion(number_of_flavors)
         for fermion in [q, qc, u, uc, d, dc, L, Lc, e, ec]
     ]
 
-    sm_bosons = [bL, bR, wL, wR, gL, gR, phi, phic]
 
-    return EFT(sm_gauge_algebra, sm_fermions + sm_bosons)
+sm_field_strengths = [bL, bR, wL, wR, gL, gR]
+
+sm_scalars = [phi, phic]
+
+
+def sm_classes_of_fields(number_of_flavors=1):
+    out = {}
+    out.update({field: 'phi' for field in sm_scalars})
+    out.update({field: 'F' for field in sm_field_strengths})
+    out.update({field: 'psi' for field in sm_fermions(1)})
+
+    return out
+
+
+def smeft(number_of_flavors=1):
+    return EFT(
+        sm_gauge_algebra,
+        sm_scalars + sm_field_strengths + sm_fermions(number_of_flavors)
+    )

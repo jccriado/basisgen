@@ -2,9 +2,7 @@ import argparse
 import cProfile
 
 from invariants.fields import EFT
-from invariants.smeft import (
-    smeft, phi, phic, bL, bR, wL, wR, gL, gR, q, qc, L, Lc, u, uc, d, dc, e, ec
-)
+from invariants.smeft import smeft, sm_field_classes
 
 
 def parse_arguments():
@@ -58,22 +56,16 @@ if __name__ == '__main__':
         ignore_lower_dimension=arguments.ignore_lower_dimension
     )
 
-    fermions = [
-        fermion(1)
-        for fermion in [q, qc, L, Lc, u, uc, d, dc, e, ec]
-    ]
-
-    gauge_bosons = [bL, bR, wL, wR, gL, gR]
-
     if arguments.profile:
         profiler.disable()
 
     print("Number of invariants: {}".format(EFT.count_invariants(invariants)))
 
-    classes = {fermion: 'psi' for fermion in fermions}
-    classes.update({gauge_boson: 'X' for gauge_boson in gauge_bosons})
-    classes.update({phi: 'phi', phic: 'phi'})
-    print(EFT.show_invariants(invariants, by_lines=False, classes=classes))
+    print(EFT.show_invariants(
+        invariants,
+        by_lines=False,
+        classes=sm_field_classes(arguments.number_of_flavors)
+    ))
 
     if arguments.profile:
         profiler.print_stats(sort='time')
