@@ -1,3 +1,4 @@
+from invariants.algebras import SemisimpleAlgebra
 from invariants.weights import Weight
 from invariants.statistics import Statistics
 from invariants.containers import MultivaluedMap, OrderedCounter
@@ -89,25 +90,36 @@ class Irrep(object):
 
     @staticmethod
     @functools.lru_cache(maxsize=None)
-    def _mul_semisimple_irreps(self, other):
-        self_irreps = map(
-            Irrep,
-            self.algebra.simple_algebras,
-            self.algebra.split_weight(self.highest_weight)
+    def positive_roots(algebra):
+        roots = Irrep(algebra, algebra.highest_root).weights_by_level
+        return list(
+            itertools.chain.from_iterable(
+                roots[level]
+                for level in range(algebra.level_of_simple_roots + 1)
+            )
         )
 
-        other_irreps = map(
+    @staticmethod
+    @functools.lru_cache(maxsize=None)
+    def _mul_semisimple_irreps(first, second):
+        first_irreps = map(
             Irrep,
-            other.algebra.simple_algebras,
-            other.algebra.split_weight(other.highest_weight)
+            first.algebra.simple_algebras,
+            first.algebra.split_weight(first.highest_weight)
+        )
+
+        second_irreps = map(
+            Irrep,
+            second.algebra.simple_algebras,
+            second.algebra.split_weight(second.highest_weight)
         )
 
         out = collections.Counter()
 
         for combination in itertools.product(*(
-                (self_irrep * other_irrep).items()
-                for self_irrep, other_irrep
-                in zip(self_irreps, other_irreps)
+                (first_irrep * second_irrep).items()
+                for first_irrep, second_irrep
+                in zip(first_irreps, second_irreps)
         )):
             irrep = combination[0][0]
             count = combination[0][1]
@@ -121,23 +133,25 @@ class Irrep(object):
 
     @staticmethod
     @functools.lru_cache(maxsize=None)
-    def _mul_simple_irreps(self, other):
+    def _mul_simple_irreps(first, second):
         product_representation = (
-            self.representation * other.representation
+            first.representation * second.representation
         )
 
-        return product_representation.decompose(self.algebra)
+        return product_representation.decompose(first.algebra)
 
     def __mul__(self, other):
         if isinstance(other, Irrep):
-            if (
-                    isinstance(self.algebra, collections.Iterable)
-                    and isinstance(other.algebra, collections.Iterable)
-            ):
-                return Irrep._mul_semisimple_irreps(self, other)
+            are_semisimple = (
+                isinstance(self.algebra, SemisimpleAlgebra)
+                and isinstance(other.algebra, SemisimpleAlgebra)
+            )
 
+            if are_semisimple:
+                return Irrep._mul_semisimple_irreps(self, other)
             else:
                 return Irrep._mul_simple_irreps(self, other)
+
         else:
             return Irrep.product(collections.Counter([self]), other)
 
@@ -168,16 +182,6 @@ class Irrep(object):
             ),
             collections.Counter()
         )
-
-    # @staticmethod
-    # def product(first_irrep_list, second_irrep_list):
-        # return list(
-        #     itertools.chain.from_iterable([
-        #         first_irrep * second_irrep
-        #         for first_irrep in first_irrep_list
-        #         for second_irrep in second_irrep_list
-        #     ])
-        # )
 
     def _child_weights(self, weight, level):
         return MultivaluedMap.from_pairs(
@@ -213,7 +217,7 @@ class Irrep(object):
             previous_multiplicities.get(weight + k*alpha, 0)
             * self.algebra.scalar_product(weight + k*alpha, alpha)
             for k in range(1, level + 1)
-            for alpha in self.algebra.positive_roots
+            for alpha in Irrep.positive_roots(self.algebra)
         )
 
         denominator = (
@@ -254,7 +258,7 @@ class Irrep(object):
 
     @property
     def representation(self):
-        if isinstance(self.algebra, collections.Iterable):
+        if isinstance(self.algebra, SemisimpleAlgebra):
             return self._semisimple_representation
         else:
             return Representation(self.weights_with_multiplicities)

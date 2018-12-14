@@ -1,5 +1,4 @@
 from invariants.weights import Weight
-from invariants.representations import Irrep
 
 import abc
 import collections
@@ -177,17 +176,6 @@ class SimpleAlgebra(Algebra):
             Series.F: 10,
             Series.G: 4
         }[self.series]
-
-    @property
-    @functools.lru_cache(maxsize=None)
-    def positive_roots(self):
-        roots = Irrep(self, self.highest_root).weights_by_level
-        return list(
-            itertools.chain.from_iterable(
-                roots[level]
-                for level in range(self.level_of_simple_roots + 1)
-            )
-        )
 
     @property
     @functools.lru_cache(maxsize=None)
