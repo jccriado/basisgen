@@ -91,48 +91,57 @@ class Irrep(object):
             and self.algebra == other.algebra
         )
 
+    @staticmethod
     @functools.lru_cache(maxsize=None)
+    def _mul_semisimple_irreps(self, other):
+        self_irreps = map(
+            Irrep,
+            self.algebra.simple_algebras,
+            self.algebra.split_weight(self.highest_weight)
+        )
+
+        other_irreps = map(
+            Irrep,
+            other.algebra.simple_algebras,
+            other.algebra.split_weight(other.highest_weight)
+        )
+
+        out = collections.Counter()
+
+        for combination in itertools.product(*(
+                (self_irrep * other_irrep).items()
+                for self_irrep, other_irrep
+                in zip(self_irreps, other_irreps)
+        )):
+            irrep = combination[0][0]
+            count = combination[0][1]
+            for inner_irrep, inner_count in combination[1:]:
+                irrep += inner_irrep
+                inner_count *= inner_count
+
+            out += collections.Counter({irrep: count})
+
+        return out
+
+    @staticmethod
+    @functools.lru_cache(maxsize=None)
+    def _mul_simple_irreps(self, other):
+        product_representation = (
+            self.representation * other.representation
+        )
+
+        return product_representation.decompose(self.algebra)
+
     def __mul__(self, other):
         if isinstance(other, Irrep):
             if (
                     isinstance(self.algebra, collections.Iterable)
                     and isinstance(other.algebra, collections.Iterable)
             ):
-                self_irreps = map(
-                    Irrep,
-                    self.algebra.simple_algebras,
-                    self.algebra.split_weight(self.highest_weight)
-                )
-
-                other_irreps = map(
-                    Irrep,
-                    other.algebra.simple_algebras,
-                    other.algebra.split_weight(other.highest_weight)
-                )
-
-                out = collections.Counter()
-
-                for combination in itertools.product(*(
-                        (self_irrep * other_irrep).items()
-                        for self_irrep, other_irrep
-                        in zip(self_irreps, other_irreps)
-                )):
-                    irrep = combination[0][0]
-                    count = combination[0][1]
-                    for inner_irrep, inner_count in combination[1:]:
-                        irrep += inner_irrep
-                        inner_count *= inner_count
-
-                    out += collections.Counter({irrep: count})
-
-                return out
+                return Irrep._mul_semisimple_irreps(self, other)
 
             else:
-                product_representation = (
-                    self.representation * other.representation
-                )
-
-                return product_representation.decompose(self.algebra)
+                return Irrep._mul_simple_irreps(self, other)
         else:
             return Irrep.product(collections.Counter([self]), other)
 

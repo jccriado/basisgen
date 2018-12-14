@@ -1,14 +1,9 @@
 from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
+import invariants.lorentz as lorentz
 from invariants.statistics import Statistics
 from invariants.weights import Weight
 
 import re
-
-
-_lorentz_algebra = SemisimpleAlgebra([
-    SimpleAlgebra(Series.A, 1),
-    SimpleAlgebra(Series.A, 1)
-])
 
 
 def parse_statistics(code):
@@ -35,7 +30,7 @@ def parse_lorentz_highest_weight(code):
 
 def _parse_simple_group(code):
     if code == 'Lorentz' or code == 'lorentz':
-        return _lorentz_algebra
+        return lorentz.algebra
 
     match = re.match(r'(?P<series>SU|SO|Sp)(?P<N>[0-9]+)', code)
     series = match.group('series')

@@ -6,10 +6,10 @@ from invariants.weights import Weight
 algebra = SimpleAlgebra(Series.A, 1)
 
 
-def irrep(n):
-    return Irrep(algebra, Weight([n - 1]))
+def SU2_irrep(n):
+    return Irrep(algebra, Weight([int(n) - 1]))
 
 
-singlet = irrep(1)
-doublet = irrep(2)
-triplet = irrep(3)
+singlet = SU2_irrep(1)
+doublet = SU2_irrep(2)
+triplet = SU2_irrep(3)

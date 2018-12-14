@@ -1,5 +1,6 @@
 from invariants.algebras import Series, SimpleAlgebra
 from invariants.representations import Irrep
+from invariants.SU3 import SU3_irrep
 from invariants.weights import Weight
 
 import unittest
@@ -59,67 +60,44 @@ class TestIrrep(unittest.TestCase):
             self.assertEqual(irrep.representation.weights, weights)
 
     def test_su3_tensor_products(self):
-        su3 = SimpleAlgebra(Series.A, 2)
-
-        def irrep(name):
-            if name[-1] == '*':
-                conjugate = irrep(name[:-1])
-                conjugate.highest_weight = Weight([
-                    conjugate.highest_weight[1],
-                    conjugate.highest_weight[0],
-                ])
-                return conjugate
-
-            return {
-                '1': Irrep(su3, Weight([0, 0])),
-                '3': Irrep(su3, Weight([1, 0])),
-                '6': Irrep(su3, Weight([2, 0])),
-                '8': Irrep(su3, Weight([1, 1])),
-                '10': Irrep(su3, Weight([3, 0])),
-                '15': Irrep(su3, Weight([2, 1])),
-                "15'": Irrep(su3, Weight([4, 0])),
-                '21': Irrep(su3, Weight([0, 5])),
-                '24': Irrep(su3, Weight([1, 3])),
-                '27': Irrep(su3, Weight([2, 2]))
-            }[name]
-
         known_decompositions = [
             (
-                irrep('3*') * irrep('3*'),
-                [irrep('3'), irrep('6*')]
+                SU3_irrep('3*') * SU3_irrep('3*'),
+                [SU3_irrep('3'), SU3_irrep('6*')]
             ),
             (
-                irrep('3') * irrep('3*'),
-                [irrep('1'), irrep('8')]
+                SU3_irrep('3') * SU3_irrep('3*'),
+                [SU3_irrep('1'), SU3_irrep('8')]
             ),
             (
-                irrep('6') * irrep('3'),
-                [irrep('8'), irrep('10')]
+                SU3_irrep('6') * SU3_irrep('3'),
+                [SU3_irrep('8'), SU3_irrep('10')]
             ),
             (
-                irrep('6') * irrep('3*'),
-                [irrep('3'), irrep('15')]
+                SU3_irrep('6') * SU3_irrep('3*'),
+                [SU3_irrep('3'), SU3_irrep('15')]
             ),
             (
-                irrep('6') * irrep('6'),
-                [irrep('6*'), irrep('15'), irrep("15'")]
+                SU3_irrep('6') * SU3_irrep('6'),
+                [SU3_irrep('6*'), SU3_irrep('15'), SU3_irrep("15'")]
             ),
             (
-                irrep('6') * irrep('6*'),
-                [irrep('1'), irrep('8'), irrep('27')]
+                SU3_irrep('6') * SU3_irrep('6*'),
+                [SU3_irrep('1'), SU3_irrep('8'), SU3_irrep('27')]
             ),
             (
-                irrep('8') * irrep('3'),
-                [irrep('3'), irrep('6*'), irrep('15')],
+                SU3_irrep('8') * SU3_irrep('3'),
+                [SU3_irrep('3'), SU3_irrep('6*'), SU3_irrep('15')],
             ),
             (
-                irrep('8') * irrep('6*'),
-                [irrep('3'), irrep('6*'), irrep('15'), irrep('24')]
+                SU3_irrep('8') * SU3_irrep('6*'),
+                [SU3_irrep('3'), SU3_irrep('6*'),
+                 SU3_irrep('15'), SU3_irrep('24')]
             ),
             (
-                irrep('8') * irrep('8'),
-                [irrep('1'), irrep('8'), irrep('8'),
-                 irrep('10'), irrep('10*'), irrep('27')]
+                SU3_irrep('8') * SU3_irrep('8'),
+                [SU3_irrep('1'), SU3_irrep('8'), SU3_irrep('8'),
+                 SU3_irrep('10'), SU3_irrep('10*'), SU3_irrep('27')]
             )
         ]
 
