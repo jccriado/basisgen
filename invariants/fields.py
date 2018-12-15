@@ -1,6 +1,6 @@
 from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.shortcuts import lorentz_algebra
 from invariants.representations import Irrep
+from invariants.shortcuts import lorentz_algebra
 from invariants.statistics import Statistics
 from invariants.partitions import partitions
 from invariants.weights import Weight
