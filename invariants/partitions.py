@@ -1,6 +1,7 @@
 import itertools
 
 
+# TODO: see arXiv:0909.2331
 def accel_asc(n):
     a = [0 for i in range(n + 1)]
     k = 1
