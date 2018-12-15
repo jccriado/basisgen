@@ -1,5 +1,5 @@
 from invariants.fields import Operator, EFT
-from invariants.smeft import phi, phic, sm_gauge_algebra, smeft
+from invariants.smeft import sm_gauge_algebra, smeft, phi, phic, u, uc, gL, gR
 
 import unittest
 from collections import Counter
@@ -35,6 +35,14 @@ class TestSMEFT(unittest.TestCase):
 
     def test_3_flavors(self):
         self.assertEqual(EFT.count_invariants(smeft(3).invariants(4)), 62)
+
+    def test_operator_u_uc_gL_gR_D(self):
+        operator = u(1) * uc(1) * gL * gR
+
+        self.assertEqual(
+            operator.invariants(8, ignore_lower_dimensions=True),
+            {1: 3}
+        )
 
 
 if __name__ == '__main__':
