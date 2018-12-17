@@ -1,5 +1,6 @@
 from invariants.fields import Operator, EFT
 from invariants.smeft import sm_gauge_algebra, smeft, phi, phic, u, uc, gL, gR
+from invariants.weights import Weight
 
 import unittest
 from collections import Counter
@@ -43,6 +44,20 @@ class TestSMEFT(unittest.TestCase):
             operator.invariants(8, ignore_lower_dimensions=True),
             {1: 3}
         )
+
+    def test_covariants_higgs(self):
+        covariants = EFT(sm_gauge_algebra, [phi, phic]).covariants(3)
+
+        known_covariants = {
+            (Weight([0, 0, 0, 0, 1]), (-0.5,)):
+            Counter({(phic._to_operator(), 0): 1, (phi * phic**2, 0): 1}),
+
+            (Weight([1, 1, 0, 0, 1]), (-0.5,)):
+            Counter({(phic._to_operator(), 1): 1})
+        }
+
+        for key in known_covariants:
+            self.assertEqual(covariants[key], known_covariants[key])
 
 
 if __name__ == '__main__':

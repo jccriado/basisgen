@@ -66,10 +66,12 @@ class Irrep(object):
         self.highest_weight = highest_weight
 
     def __str__(self):
-        return "Irrep({algebra}, {highest_weight})".format(
-            algebra=self.algebra,
-            highest_weight=self.highest_weight
-        )
+        return f"Irrep({self.highest_weight})"
+
+        # return "Irrep({algebra}, {highest_weight})".format(
+        #     algebra=self.algebra,
+        #     highest_weight=self.highest_weight
+        # )
 
     __repr__ = __str__
 

@@ -115,6 +115,9 @@ class Operator(object):
         return self.content == other.content
 
     def __str__(self):
+        if not self.content:
+            return "1"
+
         def power_str(item):
             field, exponent = item
             if exponent == 1:
@@ -161,7 +164,7 @@ class Operator(object):
 
     @property
     def irreps(self):
-        power_irreps = (
+        power_irreps = list(
             [
                 [
                     field.irrep.power(inner_exponent, field.statistics)
@@ -171,6 +174,9 @@ class Operator(object):
             ]
             for field, exponent in self.content.items()
         )
+
+        if not self.content:
+            return Counter()
 
         return sum(
             (
@@ -206,7 +212,7 @@ class Operator(object):
                 for operator in derivative.differentiate(times - 1)
             }
 
-    def internal_singlets(self, max_dimension):
+    def internal_singlets(self, max_dimension, filter_internal_singlets):
         max_derivatives = int(max_dimension - self.dimension)
 
         return {
@@ -214,7 +220,7 @@ class Operator(object):
                 irrep
                 for operator in self.differentiate(number_of_derivatives)
                 for irrep in operator.irreps.elements()
-                if irrep[2:].is_singlet
+                if not filter_internal_singlets or irrep[2:].is_singlet
             )
             for number_of_derivatives in range(max_derivatives + 1)
         }
@@ -237,12 +243,15 @@ class Operator(object):
             for number_of_derivatives in range(1, max_derivatives + 1)
         }
 
-    def invariants(self, max_dimension, ignore_lower_dimensions=False):
-        singlets = self.internal_singlets(max_dimension)
+    def irreps_by_derivatives(self, max_dimension):
+        out_irreps = self.internal_singlets(
+            max_dimension,
+            filter_internal_singlets=True
+        )
 
         for derivative_count in range(int(max_dimension - self.dimension)):
-            current_singlets = singlets[derivative_count].items()
-            for initial_irrep, initial_count in current_singlets:
+            current_irreps = out_irreps[derivative_count].items()
+            for initial_irrep, initial_count in current_irreps:
                 descendants = Operator.descendants(
                     initial_irrep,
                     int(max_dimension - self.dimension - derivative_count),
@@ -250,13 +259,17 @@ class Operator(object):
                 )
 
                 for number_of_derivatives, counter in descendants.items():
-                    singlets[number_of_derivatives] -= Counter({
+                    out_irreps[number_of_derivatives] -= Counter({
                         irrep: count * initial_count
                         for irrep, count in counter.items()
                     })
 
+        return out_irreps
+
+    def invariants(self, max_dimension, ignore_lower_dimensions=False):
+        irreps_by_derivatives = self.irreps_by_derivatives(max_dimension)
         result = {}
-        for number_of_derivatives, counter in singlets.items():
+        for number_of_derivatives, counter in irreps_by_derivatives.items():
             if (
                     not ignore_lower_dimensions
                     or number_of_derivatives == max_dimension - self.dimension
@@ -269,6 +282,27 @@ class Operator(object):
                     result[number_of_derivatives] = total
 
         return result
+
+    def covariants(self, max_dimension, ignore_lower_dimensions=False):
+        irreps_by_derivatives = self.internal_singlets(
+            max_dimension,
+            False
+        )
+
+        if ignore_lower_dimensions:
+            number_of_derivatives = max_dimension - self.dimension
+            irreps = irreps_by_derivatives[number_of_derivatives]
+            if irreps:
+                return {number_of_derivatives: irreps}
+            else:
+                return {}
+        else:
+            return {
+                number_of_derivatives: irreps
+                for number_of_derivatives, irreps
+                in irreps_by_derivatives.items()
+                if irreps
+            }
 
 
 class EFT(object):
@@ -395,4 +429,80 @@ class EFT(object):
             count
             for counter in invariants.values()
             for count in counter.values()
+        )
+
+    def _covariants(self, max_dimension, verbose, ignore_lower_dimension):
+        result = {}
+
+        if verbose:
+            print(
+                "Computing field content combinations... ", end="", flush=True
+            )
+
+        operators = list(self.operators(max_dimension))
+        total = len(operators)
+        spaces = " " * (round(math.log(total, 10)) + 1)
+
+        if verbose:
+            print("done.")
+            print(f"Computing covariants... (0/{total})", end="\r", flush=True)
+
+        for progress, operator in enumerate(operators):
+            if verbose and progress % round(total / 50) == 0:
+                print(
+                    f"Computing covariants ({progress}/{total})" + spaces,
+                    end="\r",
+                    flush=True
+                )
+
+            covariants = operator.covariants(
+                max_dimension,
+                ignore_lower_dimension
+            )
+            for number_of_derivatives, irreps in covariants.items():
+                for irrep, count in irreps.items():
+                    irrep_with_charges = (
+                        irrep.highest_weight,
+                        tuple(operator.charges)
+                    )
+                    result.setdefault(irrep_with_charges, Counter())
+                    result[irrep_with_charges] += Counter({
+                        (operator, number_of_derivatives): count
+                    })
+
+        if verbose:
+            print(f"Computing covariants... done." + spaces * 2, flush=True)
+
+        return result
+
+    def covariants(
+            self,
+            max_dimension,
+            verbose=False,
+            ignore_lower_dimension=False
+    ):
+        return self.cached_results.setdefault(
+            ('covariants', max_dimension),
+            self._covariants(max_dimension, verbose, ignore_lower_dimension)
+        )
+
+    @staticmethod
+    def show_covariants(covariants):
+        return "\n".join(
+            "{irrep}: {operators}".format(
+                irrep=irrep,
+                operators=" + ".join(
+                    "{count}{operator}{derivatives}".format(
+                        count=str(count) + " " if count > 1 else "",
+                        operator=operator,
+                        derivatives="" if number_of_derivatives == 0 else (
+                            " D" if number_of_derivatives == 1 else
+                            f" D^{number_of_derivatives}"
+                        )
+                    )
+                    for (operator, number_of_derivatives), count
+                    in operator_counter.items()
+                )
+            )
+            for irrep, operator_counter in covariants.items()
         )
