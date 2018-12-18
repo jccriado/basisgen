@@ -51,13 +51,13 @@ class SimpleAlgebra(Algebra):
             )
 
     def __init__(self, series, rank):
-        SimpleAlgebra.check_rank_bounds(series, rank)
+        SimpleAlgebra._check_rank_bounds(series, rank)
 
         self.series = series
         self.rank = rank
 
     @staticmethod
-    def check_rank_bounds(series, rank):
+    def _check_rank_bounds(series, rank):
         if series == Series.A and rank < 1:
             raise SimpleAlgebra.IncorrectRank(series, rank, "n >= 1")
         if series == Series.B and rank < 2:

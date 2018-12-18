@@ -40,3 +40,6 @@ class Weight(object):
 
     def __len__(self):
         return len(self.components)
+
+    def concat(self, other):
+        return Weight(self.components + other.components)

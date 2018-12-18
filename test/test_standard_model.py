@@ -12,14 +12,14 @@ class TestSMEFT(unittest.TestCase):
 
         for dimension, number_of_invariants in invariants_by_dimension.items():
             self.assertEqual(
-                EFT.count_invariants(smeft(1).invariants(dimension)),
+                smeft(1).invariants(dimension).count(),
                 number_of_invariants
             )
 
     def test_higgs_dimension_8_basis(self):
         higgs_only = EFT(sm_gauge_algebra, [phi, phic])
 
-        invariants = {
+        invariants = EFT.Invariants({
             Operator(Counter({phic: 1, phi: 1})): {0: 1},
 
             Operator(Counter({phic: 2, phi: 2})): {0: 1, 2: 2, 4: 3},
@@ -27,7 +27,7 @@ class TestSMEFT(unittest.TestCase):
             Operator(Counter({phic: 3, phi: 3})): {0: 1, 2: 2},
 
             Operator(Counter({phic: 4, phi: 4})): {0: 1}
-        }
+        })
 
         self.assertEqual(
             higgs_only.invariants(8, verbose=False),
@@ -35,7 +35,7 @@ class TestSMEFT(unittest.TestCase):
         )
 
     def test_3_flavors(self):
-        self.assertEqual(EFT.count_invariants(smeft(3).invariants(4)), 62)
+        self.assertEqual(smeft(3).invariants(4).count(), 62)
 
     def test_operator_u_uc_gL_gR_D(self):
         operator = u(1) * uc(1) * gL * gR
@@ -57,7 +57,10 @@ class TestSMEFT(unittest.TestCase):
         }
 
         for key in known_covariants:
-            self.assertEqual(covariants[key], known_covariants[key])
+            self.assertEqual(
+                covariants[key],
+                known_covariants[key]
+            )
 
 
 if __name__ == '__main__':

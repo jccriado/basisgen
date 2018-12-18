@@ -8,53 +8,54 @@ import itertools
 import functools
 
 
-class Representation(object):
+class WeightSystem(object):
     def __init__(self, weights):
-        self.weights = weights
+        self.weights = collections.Counter(weights)
 
     def __str__(self):
-        return str(self.weights)
+        return str(self.weights.elements())
 
     __repr__ = __str__
 
     def __iter__(self):
-        return iter(self.weights)
+        return iter(self.weights.items())
+
+    def __add__(self, other):
+        return WeightSystem(self.weights + other.weights)
 
     def __mul__(self, other):
-        return Representation(collections.Counter(
+        return WeightSystem(
             first_weight + second_weight
             for first_weight in self.weights.elements()
             for second_weight in other.weights.elements()
-        ))
+        )
 
     @functools.lru_cache(maxsize=None)
     def highest_weight(self, algebra):
         return max(self.weights, key=algebra.height)
 
+    def _sorted_weights(self, algebra):
+        def _first_height(pair):
+            return algebra.height(pair[0])
+
+        return OrderedCounter.sort(self, _first_height)
+
     @functools.lru_cache(maxsize=None)
     def decompose(self, algebra):
-        def _item_height(item):
-            return algebra.height(item[0])
-
-        remaining_weights = OrderedCounter(collections.OrderedDict(
-            sorted(
-                self.weights.items(),
-                key=_item_height
-            )
-        ))
-
-        irreps = collections.Counter()
+        remaining_weights = self._sorted_weights(algebra)
+        irreps = IrrepCounter()
 
         while remaining_weights:
             highest_weight, multiplicity = remaining_weights.popitem()
+
             current_irrep = Irrep(algebra, highest_weight)
             irreps[current_irrep] += multiplicity
 
+            current_rep = current_irrep.weight_system
             remaining_weights[highest_weight] = multiplicity
             remaining_weights -= collections.Counter({
                 weight: count * multiplicity
-                for weight, count in
-                current_irrep.representation.weights.items()
+                for weight, count in current_rep
             })
 
         return irreps
@@ -66,93 +67,81 @@ class Irrep(object):
         self.highest_weight = highest_weight
 
     def __str__(self):
-        return f"Irrep({self.highest_weight})"
+        return "[{weight}]".format(weight=self.highest_weight)
 
-        # return "Irrep({algebra}, {highest_weight})".format(
-        #     algebra=self.algebra,
-        #     highest_weight=self.highest_weight
-        # )
-
-    __repr__ = __str__
+    def __repr__(self):
+        return "Irrep({algebra}, {weight})".format(
+            algebra=self.algebra,
+            weight=self.highest_weight
+        )
 
     def __add__(self, other):
-        concatenated_weight = Weight(list(
-            itertools.chain(self.highest_weight, other.highest_weight)
-        ))
-        return Irrep(self.algebra + other.algebra, concatenated_weight)
+        return Irrep(
+            self.algebra + other.algebra,
+            self.highest_weight.concat(other.highest_weight)
+        )
 
     def __hash__(self):
-        return hash((self.algebra, tuple(self.highest_weight)))
+        return hash((self.algebra, self.highest_weight))
 
     def __eq__(self, other):
         return (
-            tuple(self.highest_weight) == tuple(other.highest_weight)
-            and self.algebra == other.algebra
+            self.algebra == other.algebra
+            and self.highest_weight == other.highest_weight
         )
 
     @staticmethod
     @functools.lru_cache(maxsize=None)
     def positive_roots(algebra):
-        roots = Irrep(algebra, algebra.highest_root).weights_by_level
-        return list(
-            itertools.chain.from_iterable(
-                roots[level]
-                for level in range(algebra.level_of_simple_roots + 1)
-            )
+        all_roots = Irrep(algebra, algebra.highest_root).weights_by_level
+
+        return [
+            root
+            for level in range(algebra.level_of_simple_roots + 1)
+            for root in all_roots[level]
+        ]
+
+    def split(self):
+        return map(
+            Irrep,
+            self.algebra.simple_algebras,
+            self.algebra.split_weight(self.highest_weight)
         )
 
-    @staticmethod
     @functools.lru_cache(maxsize=None)
-    def _mul_semisimple_irreps(first, second):
-        first_irreps = list(map(
-            Irrep,
-            first.algebra.simple_algebras,
-            first.algebra.split_weight(first.highest_weight)
-        ))
+    def _mul_semisimple_irreps(self, other):
+        out = IrrepCounter()
 
-        second_irreps = list(map(
-            Irrep,
-            second.algebra.simple_algebras,
-            second.algebra.split_weight(second.highest_weight)
-        ))
+        zipped_with_product = (
+            (first_irrep * second_irrep).items()
+            for first_irrep, second_irrep
+            in zip(self.split(), other.split())
+        )
 
-        out = collections.Counter()
-
-        for combination in itertools.product(*(
-                (first_irrep * second_irrep).items()
-                for first_irrep, second_irrep
-                in zip(first_irreps, second_irreps)
-        )):
-            irrep = combination[0][0]
-            count = combination[0][1]
+        for combination in itertools.product(*zipped_with_product):
+            irrep, count = combination[0]
             for inner_irrep, inner_count in combination[1:]:
                 irrep += inner_irrep
                 count *= inner_count
 
-            out += collections.Counter({irrep: count})
+            out += IrrepCounter({irrep: count})
 
         return out
 
-    @staticmethod
     @functools.lru_cache(maxsize=None)
-    def _mul_simple_irreps(first, second):
-        product_representation = first.representation * second.representation
-        return product_representation.decompose(first.algebra)
+    def _mul_simple_irreps(self, other):
+        product_weight_system = self.weight_system * other.weight_system
+        return product_weight_system.decompose(self.algebra)
 
     def __mul__(self, other):
         if isinstance(other, Irrep):
-            are_semisimple = (
-                isinstance(self.algebra, SemisimpleAlgebra)
-                and isinstance(other.algebra, SemisimpleAlgebra)
-            )
-
-            if are_semisimple:
-                return Irrep._mul_semisimple_irreps(self, other)
+            if isinstance(self.algebra, SemisimpleAlgebra):
+                return self._mul_semisimple_irreps(other)
             else:
-                return Irrep._mul_simple_irreps(self, other)
+                return self._mul_simple_irreps(other)
 
         else:
-            return Irrep.product(collections.Counter([self]), other)
+            return Irrep.product(IrrepCounter([self]), other)
 
     __rmul__ = __mul__
 
@@ -167,20 +156,6 @@ class Irrep(object):
     @functools.lru_cache(maxsize=None)
     def singlet(algebra):
         return Irrep(algebra, Weight([0] * algebra.rank))
-
-    @staticmethod
-    def product(first_irrep_counter, second_irrep_counter):
-        return sum(
-            (
-                collections.Counter({
-                    irrep: count * first_count * second_count
-                    for irrep, count in (first_irrep * second_irrep).items()
-                })
-                for first_irrep, first_count in first_irrep_counter.items()
-                for second_irrep, second_count in second_irrep_counter.items()
-            ),
-            collections.Counter()
-        )
 
     def _child_weights(self, weight, level):
         return MultivaluedMap.from_pairs(
@@ -241,26 +216,26 @@ class Irrep(object):
         return multiplicities
 
     @property
-    def _semisimple_representation(self):
+    def _semisimple_weight_system(self):
         algebras = self.algebra.simple_algebras
         split_highest_weight = self.algebra.split_weight(self.highest_weight)
 
         split_weights = (
-            Irrep(algebra, weight).representation.weights.elements()
+            Irrep(algebra, weight).weight_system.weights.elements()
             for algebra, weight in zip(algebras, split_highest_weight)
         )
 
-        return Representation(collections.Counter([
+        return WeightSystem(
             Weight(list(itertools.chain.from_iterable(weights)))
             for weights in itertools.product(*split_weights)
-        ]))
+        )
 
     @property
-    def representation(self):
+    def weight_system(self):
         if isinstance(self.algebra, SemisimpleAlgebra):
-            return self._semisimple_representation
+            return self._semisimple_weight_system
         else:
-            return Representation(self.weights_with_multiplicities)
+            return WeightSystem(self.weights_with_multiplicities)
 
     @functools.lru_cache(maxsize=None)
     def power(self, exponent, statistics):
@@ -269,11 +244,43 @@ class Irrep(object):
             Statistics.FERMION: itertools.combinations
         }[statistics]
 
-        weights = self.representation.weights.elements()
+        weights = self.weight_system.weights.elements()
 
-        power_weights = collections.Counter([
+        power_weights = (
             sum(combination, Irrep.singlet(self.algebra).highest_weight)
             for combination in combinations_function(weights, exponent)
-        ])
+        )
 
-        return Representation(power_weights).decompose(self.algebra)
+        return WeightSystem(power_weights).decompose(self.algebra)
+
+
+class IrrepCounter(collections.Counter):
+    def __str__(self):
+        def term_str(irrep, counter):
+            return "{counter}{irrep}".format(
+                counter="" if counter == 1 else str(counter) + " ",
+                irrep=str(irrep)
+            )
+
+        return " + ".join(
+            term_str(irrep, counter) for irrep, counter in self.items()
+        )
+
+    def __add__(self, other):
+        return IrrepCounter(super().__add__(other))
+
+    def __mul__(self, other):
+        if not isinstance(other, collections.Counter):
+            other = IrrepCounter([other])
+
+        return sum(
+            (
+                IrrepCounter({
+                    irrep: count * first_count * second_count
+                    for irrep, count in (first_irrep * second_irrep).items()
+                })
+                for first_irrep, first_count in self.items()
+                for second_irrep, second_count in other.items()
+            ),
+            IrrepCounter()
+        )

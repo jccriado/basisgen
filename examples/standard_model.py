@@ -59,13 +59,14 @@ if __name__ == '__main__':
     if arguments.profile:
         profiler.disable()
 
-    print("Number of invariants: {}".format(EFT.count_invariants(invariants)))
+    print("Number of invariants: {}".format(invariants.count()))
 
-    print(EFT.show_invariants(
-        invariants,
-        by_lines=False,
-        classes=sm_field_classes(arguments.number_of_flavors)
-    ))
+    print(
+        invariants.show_by_classes(
+            classes=sm_field_classes(arguments.number_of_flavors),
+            by_lines=False
+        )
+    )
 
     if arguments.profile:
         profiler.print_stats(sort='time')

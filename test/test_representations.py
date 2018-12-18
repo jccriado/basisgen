@@ -57,7 +57,7 @@ class TestIrrep(unittest.TestCase):
         }
 
         for irrep, weights in known_weights.items():
-            self.assertEqual(irrep.representation.weights, weights)
+            self.assertEqual(irrep.weight_system.weights, weights)
 
     def test_su3_tensor_products(self):
         known_decompositions = [

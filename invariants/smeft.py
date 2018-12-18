@@ -215,7 +215,7 @@ sm_field_strengths = [bL, bR, wL, wR, gL, gR]
 sm_scalars = [phi, phic]
 
 
-def sm_classes_of_fields(number_of_flavors=1):
+def sm_field_classes(number_of_flavors=1):
     out = {}
     out.update({field: 'phi' for field in sm_scalars})
     out.update({field: 'F' for field in sm_field_strengths})
