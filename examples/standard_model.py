@@ -1,7 +1,6 @@
 import argparse
 import cProfile
 
-from invariants.fields import EFT
 from invariants.smeft import smeft, sm_field_classes
 
 
