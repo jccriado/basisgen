@@ -3,8 +3,7 @@
 This is a package for calculating bases of operators in effective field
 theories. It can also be used to compute independent sets of
 gauge-covariant operators. It includes functionality for doing calculations with
-specified field content (and number covariant derivatives)Lie algebra
-representations.
+semisimple Lie algebra representations.
 
 To obtain a basis of operators, the following input is needed:
 - A semisimple Lie algebra. This corresponds to the symmetry group of the
