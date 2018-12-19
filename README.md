@@ -1,9 +1,9 @@
 [![Build Status](https://travis-ci.com/jccriado/invariants.svg?token=FCho83xJ9cZySjbkvBWS&branch=master)](https://travis-ci.com/jccriado/invariants)
 
 This is a package for calculating bases of operators in effective field
-theories. The package can also be used to compute independent sets of
-specified field content (and number covariant derivatives)gauge-covariant
-operators. It includes functionality for doing calculations with Lie algebra
+theories. It can also be used to compute independent sets of
+gauge-covariant operators. It includes functionality for doing calculations with
+specified field content (and number covariant derivatives)Lie algebra
 representations.
 
 To obtain a basis of operators, the following input is needed:
