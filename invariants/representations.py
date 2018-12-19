@@ -62,6 +62,21 @@ class WeightSystem(object):
 
 
 class Irrep(object):
+    class WeightsView(object):
+        def __init__(self, weights):
+            self.weights = weights
+
+        def __str__(self):
+            lines = [" ".join(map(str, weights)) for weights in self.weights]
+            max_length = max(map(len, lines))
+
+            return "\n".join(
+                " " * ((max_length - len(line)) // 2) + line
+                for line in lines
+            )
+
+        __repr__ = __str__
+
     def __init__(self, algebra, highest_weight):
         self.algebra = algebra
         self.highest_weight = highest_weight
@@ -237,6 +252,16 @@ class Irrep(object):
         else:
             return WeightSystem(self.weights_with_multiplicities)
 
+    def weights_view(self):
+        groups = itertools.groupby(
+            reversed(list(
+                self.weight_system._sorted_weights(self.algebra).elements()
+            )),
+            key=self.algebra.height
+        )
+
+        return Irrep.WeightsView([list(weights) for _, weights in groups])
+
     @functools.lru_cache(maxsize=None)
     def power(self, exponent, statistics):
         combinations_function = {
@@ -265,6 +290,8 @@ class IrrepCounter(collections.Counter):
         return " + ".join(
             term_str(irrep, counter) for irrep, counter in self.items()
         )
+
+    __repr__ = __str__
 
     def __add__(self, other):
         return IrrepCounter(super().__add__(other))
