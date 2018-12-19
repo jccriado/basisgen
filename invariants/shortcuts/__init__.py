@@ -10,7 +10,7 @@ from invariants.shortcuts.lorentz import (
     lorentz_algebra, lorentz_irrep,
     scalar, L_spinor, R_spinor, vector, L_tensor, R_tensor
 )
-from invariants.shortcuts.shortcuts import algebra, irrep
+from invariants.shortcuts.shortcuts import algebra, irrep, boson, fermion
 
 
 __all__ = [
