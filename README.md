@@ -133,9 +133,10 @@ be found in `examples/standard_model.py`. Runnning it as
 python standard_model.py --dimension 8
 ~~~
 
-Gives 1123 invariants (in ~ 40 seconds in a 2013 MacBook pro). This agrees with
-arXiv:1512.03433.
+Gives 1123 invariants (in ~ 40 seconds in a 2,6 GHz Intel Core i5). This agrees
+with arXiv:1512.03433.
 
-Dimension 9: 3m 8s
+Dimension 9: ~3 minutes
+Dimensino 10:
 
 
