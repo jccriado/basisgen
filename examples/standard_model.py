@@ -62,8 +62,7 @@ if __name__ == '__main__':
 
     print(
         invariants.show_by_classes(
-            classes=sm_field_classes(arguments.number_of_flavors),
-            by_lines=False
+            classes=sm_field_classes(arguments.number_of_flavors)
         )
     )
 

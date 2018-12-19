@@ -1,4 +1,4 @@
-from invariants.fields import Field, EFT
+from invariants.eft import Field, EFT
 from invariants.statistics import Statistics
 
 from invariants.shortcuts import (

@@ -1,4 +1,4 @@
-from invariants.fields import Operator, EFT
+from invariants.eft import Operator, EFT
 from invariants.smeft import sm_gauge_algebra, smeft, phi, phic, u, uc, gL, gR
 from invariants.weights import Weight
 
