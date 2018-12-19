@@ -134,8 +134,7 @@ python standard_model.py --dimension 8
 ~~~
 
 Gives 1123 invariants (in ~ 40 seconds in a 2013 MacBook pro). This agrees with
-arXiv:1512.03433. All the other operator counts for higher dimensions in 1512.03433
-are reproduced by this script.
+arXiv:1512.03433.
 
 Dimension 9: 3m 8s
 

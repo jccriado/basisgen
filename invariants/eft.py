@@ -78,6 +78,25 @@ class Field(object):
             for partition in partitions(exponent, self.number_of_flavors)
         )
 
+    # def power_irreps_v2(self, exponent):
+    #     def fact(n):
+    #         return functools.reduce(mul, range(1, n + 1), 1)
+
+    #     def combs(n, m):
+    #         return sympy.Function('combs', positive=True)(n, m)
+
+    #     return (
+    #         [
+    #             self.irrep.power(inner_exponent, self.statistics
+    # ).multiply_all(
+    #                 combs(self.number_of_flavors, len(partition))
+    #                 * len(set(itertools.permutations(partition)))
+    #             )
+    #             for inner_exponent in partition
+    #         ]
+    #         for partition in accel_asc(exponent)
+    #     )
+
     @property
     def irrep(self):
         return self.lorentz_irrep + self.internal_irrep
@@ -241,11 +260,16 @@ class Operator(object):
 
         return {
             n_derivatives:
-            IrrepCounter(
-                irrep
-                for operator in self.differentiate_fields(n_derivatives)
-                for irrep in operator.irreps.elements()
-                if not filter_internal_singlets or irrep[2:].is_singlet
+            sum(
+                (
+                    IrrepCounter({
+                        irrep: count
+                        for irrep, count in operator.irreps.items()
+                        if not filter_internal_singlets or irrep[2:].is_singlet
+                    })
+                    for operator in self.differentiate_fields(n_derivatives)
+                ),
+                IrrepCounter()
             )
             for n_derivatives in range(max_derivatives + 1)
         }
