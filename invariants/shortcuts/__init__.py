@@ -20,5 +20,5 @@ __all__ = [
     'SU3_sextet', 'SU3_anti_sextet',
     'lorentz_algebra', 'lorentz_irrep',
     'scalar', 'L_spinor', 'R_spinor', 'vector', 'L_tensor', 'R_tensor',
-    'algebra', 'irrep'
+    'algebra', 'irrep', 'boson', 'fermion'
 ]
