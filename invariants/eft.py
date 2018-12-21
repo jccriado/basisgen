@@ -180,7 +180,7 @@ class Operator(object):
                 for inner_iterable in iterable_of_iterables
             )
 
-        diff_partitions = chain_products(
+        partitions_for_differentiation = chain_products(
             (
                 partitions(number_of_derivatives, exponent)
                 for exponent, number_of_derivatives in
@@ -194,7 +194,7 @@ class Operator(object):
                 differentiate_field_by_partition(field, partition)
                 for partition, field in zip(content_partition, self.content)
             )
-            for content_partition in set(diff_partitions)
+            for content_partition in set(partitions_for_differentiation)
         )
 
         return set(
@@ -241,16 +241,13 @@ class Operator(object):
 
         return {
             n_derivatives:
-            sum(
-                (
-                    IrrepCounter({
-                        irrep: count
-                        for irrep, count in operator.irreps.items()
-                        if not filter_internal_singlets or irrep[2:].is_singlet
-                    })
-                    for operator in self.differentiate_fields(n_derivatives)
-                ),
-                IrrepCounter()
+            IrrepCounter.sum(
+                IrrepCounter({
+                    irrep: count
+                    for irrep, count in operator.irreps.items()
+                    if not filter_internal_singlets or irrep[2:].is_singlet
+                })
+                for operator in self.differentiate_fields(n_derivatives)
             )
             for n_derivatives in range(max_derivatives + 1)
         }

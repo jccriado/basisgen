@@ -135,8 +135,9 @@ python standard_model.py --dimension 8
 
 Gives 1123 invariants (in ~ 40 seconds in a 2,6 GHz Intel Core i5). This agrees
 with arXiv:1512.03433.
-
-Dimension 9: ~3 minutes
-Dimensino 10:
+Ignoring lower dimensional operators in each case:
+* Dimension 9: 560 (3 minutes)
+* Dimension 10: 15456 (15 minutes)
+* 
 
 

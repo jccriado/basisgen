@@ -282,10 +282,10 @@ class Irrep(object):
 class IrrepCounter(collections.Counter):
     def __str__(self):
         def term_str(irrep, counter):
-            return "{counter}{irrep}".format(
-                counter="" if counter == 1 else str(counter) + " ",
-                irrep=str(irrep)
-            )
+            if counter == 1:
+                return str(irrep)
+            else:
+                return "{} {}".format(counter, irrep)
 
         return " + ".join(
             term_str(irrep, counter) for irrep, counter in self.items()
@@ -300,14 +300,42 @@ class IrrepCounter(collections.Counter):
         if not isinstance(other, collections.Counter):
             other = IrrepCounter([other])
 
-        return sum(
-            (
-                IrrepCounter({
-                    irrep: count * first_count * second_count
-                    for irrep, count in (first_irrep * second_irrep).items()
-                })
-                for first_irrep, first_count in self.items()
-                for second_irrep, second_count in other.items()
-            ),
-            IrrepCounter()
+        return IrrepCounter.sum(
+            IrrepCounter({
+                irrep: count * first_count * second_count
+                for irrep, count in (first_irrep * second_irrep).items()
+            })
+            for first_irrep, first_count in self.items()
+            for second_irrep, second_count in other.items()
+        )
+
+    @staticmethod
+    def sum(irrep_counters):
+        return sum(irrep_counters, IrrepCounter())
+
+    # TODO: remove?
+    def product(iterable, filter_singlets=True):
+        import operator
+
+        chains = itertools.product(*map(IrrepCounter.elements, iterable))
+        simple_factors = (
+            list(zip(*map(Irrep.split, irreps)))
+            for irreps in chains
+        )
+
+        def ic(i):
+            return IrrepCounter([i]) if isinstance(i, Irrep) else i
+        
+        return IrrepCounter(
+            functools.reduce(operator.add, simple_irreps)
+            for simple_factor in simple_factors
+            for simple_irreps in itertools.product(*(
+                    [
+                        element
+                        for element in ic(functools.reduce(operator.mul, irreps)).elements()
+                        if filter_singlets or element.is_singlet
+                    ]
+                    for irreps in simple_factor
+
+            ))
         )

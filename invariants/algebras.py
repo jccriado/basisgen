@@ -390,10 +390,8 @@ class SemisimpleAlgebra(collections.Iterable, Algebra):
     @functools.lru_cache(maxsize=None)
     def level_vector(self):
         return Weight(
-            list(
-                itertools.chain.from_iterable(
-                    simple_algebra.level_vector
-                    for simple_algebra in self
-                )
+            itertools.chain.from_iterable(
+                simple_algebra.level_vector
+                for simple_algebra in self
             )
         )
