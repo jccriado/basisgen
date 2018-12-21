@@ -312,30 +312,3 @@ class IrrepCounter(collections.Counter):
     @staticmethod
     def sum(irrep_counters):
         return sum(irrep_counters, IrrepCounter())
-
-    # TODO: remove?
-    def product(iterable, filter_singlets=True):
-        import operator
-
-        chains = itertools.product(*map(IrrepCounter.elements, iterable))
-        simple_factors = (
-            list(zip(*map(Irrep.split, irreps)))
-            for irreps in chains
-        )
-
-        def ic(i):
-            return IrrepCounter([i]) if isinstance(i, Irrep) else i
-        
-        return IrrepCounter(
-            functools.reduce(operator.add, simple_irreps)
-            for simple_factor in simple_factors
-            for simple_irreps in itertools.product(*(
-                    [
-                        element
-                        for element in ic(functools.reduce(operator.mul, irreps)).elements()
-                        if filter_singlets or element.is_singlet
-                    ]
-                    for irreps in simple_factor
-
-            ))
-        )
