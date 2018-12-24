@@ -119,28 +119,32 @@ specified field content (and number covariant derivatives).
 
 #### The Standard Model EFT
 
-The SMEFT is defined in `invariants.smeft`. An example of use of this module can
-be found in `examples/standard_model.py`. Runnning it as
+The SMEFT is defined in `invariants.smeft`. Check the code the there to see a
+more complex example. The script `examples/standard_model.py` makes use of this
+module. To obtain the dimension 8 operators in the SMEFT (with one generation),
+do:
 
 ~~~
 python standard_model.py --dimension 8
 ~~~
 
-Gives 993 invariants (in ~ 40 seconds in a 2,6 GHz Intel Core i5). This agrees
-with arXiv:1512.03433. For higher dimensions:
+This gives 993 invariants (in ~ 40 seconds in a 2,6 GHz Intel Core i5). This
+agrees with arXiv:1512.03433. For higher dimensions:
 * Dimension 9: 560 (3 minutes)
 * Dimension 10: 15456 (15 minutes)
 
+Do `python standard_model.py --help` to see more options included in the script.
+For example, the dimension-6 SMEFT with 3 generations of fermions is obtained by:
+
+~~~
+python standard_model.py --dimension 6 --number_of_flavors 3
+~~~
+
+
 #### SU(5) GUT example
 
-As another example, consider the Georgi-Glashow model of grand unification.
-The internal symmetry group is _SU(5)_. The irreps used are:
-
-* 5 = `(1 0 0 0)`
-* 10 = `(0 1 0 0)`
-* 15 = `(2 0 0 0)`
-* 24 = `(0 0 0 3)`
-
-In `examples/SU5_GUT.py` the code that defines this theory can be found. It
-outputs 83 possible field contents for operators, each of them with
-corresponding the number of independent operators of that form.
+As another example, consider the Georgi-Glashow model of grand unification.  The
+internal symmetry group is _SU(5)_. In `examples/SU5_GUT.py` the code that
+defines this theory can be found. It outputs 83 possible field contents for
+operators, each of them with corresponding the number of independent operators
+of that form.

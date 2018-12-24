@@ -1,9 +1,7 @@
-from invariants.eft import Field, EFT
-from invariants.statistics import Statistics
-
-from invariants.shortcuts import irrep, algebra
-from invariants.lorentz import scalar, L_spinor, R_spinor, L_tensor
-
+from invariants import (
+    irrep, algebra, scalar, L_spinor, R_spinor, L_tensor,
+    boson, fermion, Field, EFT
+)
 
 sm_gauge_algebra = algebra('SU3 x SU2')
 
@@ -17,7 +15,7 @@ phi = Field(
     lorentz_irrep=scalar,
     internal_irrep=sm_irrep('0 0 1'),
     charges=[1/2],
-    statistics=Statistics.BOSON,
+    statistics=boson,
     dimension=1
 )
 phic = phi.conjugate
@@ -27,7 +25,7 @@ bL = Field(
     lorentz_irrep=L_tensor,
     internal_irrep=sm_irrep('0 0 0'),
     charges=[0],
-    statistics=Statistics.BOSON,
+    statistics=boson,
     dimension=2
 )
 bR = bL.conjugate
@@ -38,7 +36,7 @@ wL = Field(
     lorentz_irrep=L_tensor,
     internal_irrep=sm_irrep('0 0 2'),
     charges=[0],
-    statistics=Statistics.BOSON,
+    statistics=boson,
     dimension=2
 )
 wR = wL.conjugate
@@ -48,7 +46,7 @@ gL = Field(
     lorentz_irrep=L_tensor,
     internal_irrep=sm_irrep('1 1 0'),
     charges=[0],
-    statistics=Statistics.BOSON,
+    statistics=boson,
     dimension=2
 )
 gR = gL.conjugate
@@ -60,7 +58,7 @@ def q(number_of_flavors=1):
         lorentz_irrep=L_spinor,
         internal_irrep=sm_irrep('1 0 1'),
         charges=[1/6],
-        statistics=Statistics.FERMION,
+        statistics=fermion,
         dimension=1.5,
         number_of_flavors=number_of_flavors
     )
@@ -76,7 +74,7 @@ def u(number_of_flavors=1):
         lorentz_irrep=R_spinor,
         internal_irrep=sm_irrep('1 0 0'),
         charges=[2/3],
-        statistics=Statistics.FERMION,
+        statistics=fermion,
         dimension=1.5,
         number_of_flavors=number_of_flavors
     )
@@ -92,7 +90,7 @@ def d(number_of_flavors=1):
         lorentz_irrep=R_spinor,
         internal_irrep=sm_irrep('1 0 0'),
         charges=[-1/3],
-        statistics=Statistics.FERMION,
+        statistics=fermion,
         dimension=1.5,
         number_of_flavors=number_of_flavors
     )
@@ -108,7 +106,7 @@ def L(number_of_flavors=1):
         lorentz_irrep=L_spinor,
         internal_irrep=sm_irrep('0 0 1'),
         charges=[-1/2],
-        statistics=Statistics.FERMION,
+        statistics=fermion,
         dimension=1.5,
         number_of_flavors=number_of_flavors
     )
@@ -124,7 +122,7 @@ def e(number_of_flavors=1):
         lorentz_irrep=R_spinor,
         internal_irrep=sm_irrep('0 0 0'),
         charges=[-1],
-        statistics=Statistics.FERMION,
+        statistics=fermion,
         dimension=1.5,
         number_of_flavors=number_of_flavors
     )
