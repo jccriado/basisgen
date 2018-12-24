@@ -101,9 +101,10 @@ print(invariants)
 print("Total:", invariants.count())
 ~~~
 
-This code can be also found in `examples/higgs.py`. The output is
+This code can be also found in `examples/simple.py`. Running it gives:
 
 ~~~
+> python simple.py
 phi phi*: 1
 (phi)^2 (phi*)^2: 1
 (phi)^2 (phi*)^2 D^2: 2
@@ -119,10 +120,9 @@ specified field content (and number covariant derivatives).
 
 #### The Standard Model EFT
 
-The SMEFT is defined in `basisgen.smeft`. Check the code the there to see a
-more complex example. The script `examples/standard_model.py` makes use of this
-module. To obtain the dimension 8 operators in the SMEFT (with one generation),
-do:
+The SMEFT is defined in `basisgen.smeft`. See the code there for a more complex
+example. The script `examples/standard_model.py` makes use of this module. To
+obtain the dimension 8 operators in the SMEFT (with one generation), do:
 
 ~~~
 python standard_model.py --dimension 8
