@@ -1,4 +1,4 @@
-from invariants.algebras import SimpleAlgebra, SemisimpleAlgebra
+from invariants.algebras import SemisimpleAlgebra
 from invariants.weights import Weight
 from invariants.statistics import Statistics
 from invariants.containers import MultivaluedMap, OrderedCounter
