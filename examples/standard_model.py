@@ -33,7 +33,7 @@ def parse_arguments():
     )
 
     argument_parser.add_argument(
-        '--ignore_lower_dimension',
+        '--include_lower_dimension',
         action='store_const',
         default=False,
         const=True
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     invariants = smeft(arguments.number_of_flavors).invariants(
         arguments.dimension,
         verbose=True,
-        ignore_lower_dimension=arguments.ignore_lower_dimension
+        ignore_lower_dimension=not arguments.include_lower_dimension
     )
 
     if arguments.profile:

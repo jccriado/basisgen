@@ -1,7 +1,5 @@
 from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.shortcuts.parsing import (
-    parse_weight, parse_algebra, parse_lorentz_highest_weight
-)
+from invariants.parsing import parse_weight, parse_algebra
 from invariants.weights import Weight
 
 import unittest
@@ -51,7 +49,7 @@ class TestParsing(unittest.TestCase):
         )
 
         self.assertEqual(
-            parse_algebra('Lorentz x SU3 x SU2'),
+            parse_algebra('SO4 x SU3 x SU2'),
             SemisimpleAlgebra([
                 SimpleAlgebra(Series.A, 1),
                 SimpleAlgebra(Series.A, 1),
@@ -68,17 +66,6 @@ class TestParsing(unittest.TestCase):
                 SimpleAlgebra(Series.B, 23),
                 SimpleAlgebra(Series.A, 3)
             ])
-        )
-
-    def test_lorentz_highest_weight(self):
-        self.assertEqual(
-            parse_lorentz_highest_weight('L_spinor'),
-            Weight([1, 0])
-        )
-
-        self.assertEqual(
-            parse_lorentz_highest_weight('3 2'),
-            Weight([3, 2])
         )
 
 

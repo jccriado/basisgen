@@ -1,5 +1,5 @@
 from invariants.representations import Irrep, IrrepCounter
-from invariants.shortcuts import lorentz_algebra, vector
+from invariants.lorentz import lorentz_algebra, vector
 from invariants.statistics import Statistics
 from invariants.partitions import partitions
 from invariants.weights import Weight
@@ -110,6 +110,23 @@ class Field(object):
             )
             for lorentz_irrep in lorentz_irreps
         }
+
+    @property
+    def conjugate(self):
+        lorentz_highest_weight = Weight(
+            reversed(self.lorentz_irrep.highest_weight)
+        )
+
+        return Field(
+            name=self.name+"*",
+            lorentz_irrep=Irrep(lorentz_algebra, lorentz_highest_weight),
+            internal_irrep=self.internal_irrep.conjugate,
+            charges=[-charge for charge in self.charges],
+            statistics=self.statistics,
+            dimension=self.dimension,
+            number_of_derivatives=self.number_of_derivatives,
+            number_of_flavors=self.number_of_flavors
+        )
 
 
 class Operator(object):

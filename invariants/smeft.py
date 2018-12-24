@@ -1,93 +1,64 @@
 from invariants.eft import Field, EFT
 from invariants.statistics import Statistics
 
-from invariants.shortcuts import (
-    SU2_algebra, SU2_singlet, SU2_doublet, SU2_triplet,
-    SU3_algebra, SU3_singlet, SU3_triplet, SU3_anti_triplet, SU3_octet,
-    scalar, L_spinor, R_spinor, L_tensor, R_tensor
-)
+from invariants.shortcuts import irrep, algebra
+from invariants.lorentz import scalar, L_spinor, R_spinor, L_tensor
 
-sm_gauge_algebra = SU3_algebra + SU2_algebra
+
+sm_gauge_algebra = algebra('SU3 x SU2')
+
+
+def sm_irrep(highest_weight_str):
+    return irrep('SU3 x SU2', highest_weight_str)
 
 
 phi = Field(
     name='phi',
     lorentz_irrep=scalar,
-    internal_irrep=SU3_singlet+SU2_doublet,
+    internal_irrep=sm_irrep('0 0 1'),
     charges=[1/2],
     statistics=Statistics.BOSON,
     dimension=1
 )
-
-phic = Field(
-    name='phic',
-    lorentz_irrep=scalar,
-    internal_irrep=SU3_singlet+SU2_doublet,
-    charges=[-1/2],
-    statistics=Statistics.BOSON,
-    dimension=1
-)
+phic = phi.conjugate
 
 bL = Field(
     name='bL',
     lorentz_irrep=L_tensor,
-    internal_irrep=SU3_singlet+SU2_singlet,
+    internal_irrep=sm_irrep('0 0 0'),
     charges=[0],
     statistics=Statistics.BOSON,
     dimension=2
 )
+bR = bL.conjugate
 
-bR = Field(
-    name='bR',
-    lorentz_irrep=R_tensor,
-    internal_irrep=SU3_singlet+SU2_singlet,
-    charges=[0],
-    statistics=Statistics.BOSON,
-    dimension=2
-)
 
 wL = Field(
     name='wL',
     lorentz_irrep=L_tensor,
-    internal_irrep=SU3_singlet+SU2_triplet,
+    internal_irrep=sm_irrep('0 0 2'),
     charges=[0],
     statistics=Statistics.BOSON,
     dimension=2
 )
-
-wR = Field(
-    name='wR',
-    lorentz_irrep=R_tensor,
-    internal_irrep=SU3_singlet+SU2_triplet,
-    charges=[0],
-    statistics=Statistics.BOSON,
-    dimension=2
-)
+wR = wL.conjugate
 
 gL = Field(
     name='gL',
     lorentz_irrep=L_tensor,
-    internal_irrep=SU3_octet+SU2_singlet,
+    internal_irrep=sm_irrep('1 1 0'),
     charges=[0],
     statistics=Statistics.BOSON,
     dimension=2
 )
-
-gR = Field(
-    name='gR',
-    lorentz_irrep=R_tensor,
-    internal_irrep=SU3_octet+SU2_singlet,
-    charges=[0],
-    statistics=Statistics.BOSON,
-    dimension=2
-)
+gR = gL.conjugate
 
 
 def q(number_of_flavors=1):
     return Field(
         name='q',
         lorentz_irrep=L_spinor,
-        internal_irrep=SU3_triplet+SU2_doublet,
+        internal_irrep=sm_irrep('1 0 1'),
         charges=[1/6],
         statistics=Statistics.FERMION,
         dimension=1.5,
@@ -96,22 +67,14 @@ def q(number_of_flavors=1):
 
 
 def qc(number_of_flavors=1):
-    return Field(
-        name='qc',
-        lorentz_irrep=R_spinor,
-        internal_irrep=SU3_anti_triplet+SU2_doublet,
-        charges=[-1/6],
-        statistics=Statistics.FERMION,
-        dimension=1.5,
-        number_of_flavors=number_of_flavors
-    )
+    return q(number_of_flavors).conjugate
 
 
 def u(number_of_flavors=1):
     return Field(
         name='u',
         lorentz_irrep=R_spinor,
-        internal_irrep=SU3_triplet+SU2_singlet,
+        internal_irrep=sm_irrep('1 0 0'),
         charges=[2/3],
         statistics=Statistics.FERMION,
         dimension=1.5,
@@ -120,22 +83,14 @@ def u(number_of_flavors=1):
 
 
 def uc(number_of_flavors=1):
-    return Field(
-        name='uc',
-        lorentz_irrep=L_spinor,
-        internal_irrep=SU3_anti_triplet+SU2_singlet,
-        charges=[-2/3],
-        statistics=Statistics.FERMION,
-        dimension=1.5,
-        number_of_flavors=number_of_flavors
-    )
+    return u(number_of_flavors).conjugate
 
 
 def d(number_of_flavors=1):
     return Field(
         name='d',
         lorentz_irrep=R_spinor,
-        internal_irrep=SU3_triplet+SU2_singlet,
+        internal_irrep=sm_irrep('1 0 0'),
         charges=[-1/3],
         statistics=Statistics.FERMION,
         dimension=1.5,
@@ -144,22 +99,14 @@ def d(number_of_flavors=1):
 
 
 def dc(number_of_flavors=1):
-    return Field(
-        name='dc',
-        lorentz_irrep=L_spinor,
-        internal_irrep=SU3_anti_triplet+SU2_singlet,
-        charges=[1/3],
-        statistics=Statistics.FERMION,
-        dimension=1.5,
-        number_of_flavors=number_of_flavors
-    )
+    return d(number_of_flavors).conjugate
 
 
 def L(number_of_flavors=1):
     return Field(
         name='l',
         lorentz_irrep=L_spinor,
-        internal_irrep=SU3_singlet+SU2_doublet,
+        internal_irrep=sm_irrep('0 0 1'),
         charges=[-1/2],
         statistics=Statistics.FERMION,
         dimension=1.5,
@@ -168,22 +115,14 @@ def L(number_of_flavors=1):
 
 
 def Lc(number_of_flavors=1):
-    return Field(
-        name='lc',
-        lorentz_irrep=R_spinor,
-        internal_irrep=SU3_singlet+SU2_doublet,
-        charges=[1/2],
-        statistics=Statistics.FERMION,
-        dimension=1.5,
-        number_of_flavors=number_of_flavors
-    )
+    return L(number_of_flavors).conjugate
 
 
 def e(number_of_flavors=1):
     return Field(
         name='e',
         lorentz_irrep=R_spinor,
-        internal_irrep=SU3_singlet+SU2_singlet,
+        internal_irrep=sm_irrep('0 0 0'),
         charges=[-1],
         statistics=Statistics.FERMION,
         dimension=1.5,
@@ -192,15 +131,7 @@ def e(number_of_flavors=1):
 
 
 def ec(number_of_flavors=1):
-    return Field(
-        name='ec',
-        lorentz_irrep=L_spinor,
-        internal_irrep=SU3_singlet+SU2_singlet,
-        charges=[1],
-        statistics=Statistics.FERMION,
-        dimension=1.5,
-        number_of_flavors=number_of_flavors
-    )
+    return e(number_of_flavors).conjugate
 
 
 def sm_fermions(number_of_flavors):

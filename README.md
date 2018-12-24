@@ -29,7 +29,7 @@ As an example, we will compute the weight system for the representation of
 A<sub>2</sub> = su(3) with highest weight `(1 1)` (an octet):
 
 ~~~
->>> from invariants.shortcuts import irrep
+>>> from invariants import irrep
 >>> irrep('A2', '1 1').weights_view()
     (1 1)
 (2 -1) (-1 2)
@@ -84,8 +84,7 @@ compute all the independent invariants built with this field and its derivatives
 (using integration by parts and equations of motion) we can write the script:
 
 ~~~
-from invariants.eft import Field, EFT
-from invariants.shortcuts import irrep, algebra, scalar
+from invariants import algebra, irrep, scalar, Field, EFT
 
 phi = Field(
     name='phi',
@@ -93,14 +92,8 @@ phi = Field(
     internal_irrep=irrep('SU2', '1'),
     charges=[1/2]
 )
-phic = Field(
-    name='phi*',
-    lorentz_irrep=scalar,
-    internal_irrep=irrep('SU2', '1'),
-    charges=[-1/2]
-)
 
-my_eft = EFT(algebra('SU2'), [phi, phic])
+my_eft = EFT(algebra('SU2'), [phi, phi.conjugate])
 
 invariants = my_eft.invariants(max_dimension=8)
 
@@ -108,7 +101,7 @@ print(invariants)
 print("Total:", invariants.count())
 ~~~
 
-The output is
+This code can be also found in `examples/higgs.py`. The output is
 
 ~~~
 phi phi*: 1
@@ -133,11 +126,21 @@ be found in `examples/standard_model.py`. Runnning it as
 python standard_model.py --dimension 8
 ~~~
 
-Gives 1123 invariants (in ~ 40 seconds in a 2,6 GHz Intel Core i5). This agrees
-with arXiv:1512.03433.
-Ignoring lower dimensional operators in each case:
+Gives 993 invariants (in ~ 40 seconds in a 2,6 GHz Intel Core i5). This agrees
+with arXiv:1512.03433. For higher dimensions:
 * Dimension 9: 560 (3 minutes)
 * Dimension 10: 15456 (15 minutes)
-* 
 
+#### SU(5) GUT example
 
+As another example, consider the Georgi-Glashow model of grand unification.
+The internal symmetry group is _SU(5)_. The irreps used are:
+
+* 5 = `(1 0 0 0)`
+* 10 = `(0 1 0 0)`
+* 15 = `(2 0 0 0)`
+* 24 = `(0 0 0 3)`
+
+In `examples/SU5_GUT.py` the code that defines this theory can be found. It
+outputs 83 possible field contents for operators, each of them with
+corresponding the number of independent operators of that form.

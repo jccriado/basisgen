@@ -1,4 +1,4 @@
-from invariants.algebras import SemisimpleAlgebra
+from invariants.algebras import SimpleAlgebra, SemisimpleAlgebra
 from invariants.weights import Weight
 from invariants.statistics import Statistics
 from invariants.containers import MultivaluedMap, OrderedCounter
@@ -34,15 +34,15 @@ class WeightSystem(object):
     def highest_weight(self, algebra):
         return max(self.weights, key=algebra.height)
 
-    def _sorted_weights(self, algebra):
-        def _first_height(pair):
+    def sorted_weights(self, algebra):
+        def height_of_first(pair):
             return algebra.height(pair[0])
 
-        return OrderedCounter.sort(self, _first_height)
+        return OrderedCounter.sort(self, height_of_first)
 
     @functools.lru_cache(maxsize=None)
     def decompose(self, algebra):
-        remaining_weights = self._sorted_weights(algebra)
+        remaining_weights = self.sorted_weights(algebra)
         irreps = IrrepCounter()
 
         while remaining_weights:
@@ -122,6 +122,14 @@ class Irrep(object):
             self.algebra.simple_algebras,
             self.algebra.split_weight(self.highest_weight)
         )
+
+    @property
+    def conjugate(self):
+        lowest_weight = next(iter(
+            self.weight_system.sorted_weights(self.algebra)
+        ))
+
+        return Irrep(self.algebra, -lowest_weight)
 
     @functools.lru_cache(maxsize=None)
     def _mul_semisimple_irreps(self, other):
@@ -255,7 +263,7 @@ class Irrep(object):
     def weights_view(self):
         groups = itertools.groupby(
             reversed(list(
-                self.weight_system._sorted_weights(self.algebra).elements()
+                self.weight_system.sorted_weights(self.algebra).elements()
             )),
             key=self.algebra.height
         )

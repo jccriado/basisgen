@@ -1,6 +1,5 @@
 from invariants.algebras import Series, SimpleAlgebra
 from invariants.representations import Irrep
-from invariants.shortcuts import SU3_irrep
 from invariants.weights import Weight
 
 import unittest
@@ -60,6 +59,27 @@ class TestIrrep(unittest.TestCase):
             self.assertEqual(irrep.weight_system.weights, weights)
 
     def test_su3_tensor_products(self):
+        SU3_algebra = SimpleAlgebra(Series.A, 2)
+
+        name_irrep_table = {
+            '1': Irrep(SU3_algebra, Weight([0, 0])),
+            '3': Irrep(SU3_algebra, Weight([1, 0])),
+            '6': Irrep(SU3_algebra, Weight([2, 0])),
+            '8': Irrep(SU3_algebra, Weight([1, 1])),
+            '10': Irrep(SU3_algebra, Weight([3, 0])),
+            '15': Irrep(SU3_algebra, Weight([2, 1])),
+            "15'": Irrep(SU3_algebra, Weight([4, 0])),
+            '21': Irrep(SU3_algebra, Weight([0, 5])),
+            '24': Irrep(SU3_algebra, Weight([1, 3])),
+            '27': Irrep(SU3_algebra, Weight([2, 2]))
+        }
+
+        def SU3_irrep(name):
+            if name in name_irrep_table:
+                return name_irrep_table[name]
+            else:
+                return name_irrep_table[name[:-1]].conjugate
+
         known_decompositions = [
             (
                 SU3_irrep('3*') * SU3_irrep('3*'),
