@@ -1,6 +1,6 @@
-from invariants.representations import Irrep
-from invariants.parsing import parse_algebra, parse_weight
-from invariants.statistics import Statistics
+from basisgen.representations import Irrep
+from basisgen.parsing import parse_algebra, parse_weight
+from basisgen.statistics import Statistics
 
 
 algebra = parse_algebra

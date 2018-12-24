@@ -1,6 +1,6 @@
-from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.lorentz import lorentz_algebra
-from invariants.weights import Weight
+from basisgen.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
+from basisgen.lorentz import lorentz_algebra
+from basisgen.weights import Weight
 
 import re
 

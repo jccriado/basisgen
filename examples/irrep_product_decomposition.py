@@ -1,4 +1,4 @@
-from invariants.shortcuts import SU3_irrep, SU3_show
+from basisgen.shortcuts import SU3_irrep, SU3_show
 
 
 if __name__ == '__main__':

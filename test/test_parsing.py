@@ -1,6 +1,6 @@
-from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.parsing import parse_weight, parse_algebra
-from invariants.weights import Weight
+from basisgen.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
+from basisgen.parsing import parse_weight, parse_algebra
+from basisgen.weights import Weight
 
 import unittest
 

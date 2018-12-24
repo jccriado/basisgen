@@ -1,6 +1,6 @@
-from invariants.algebras import Series, SimpleAlgebra
-from invariants.representations import Irrep
-from invariants.weights import Weight
+from basisgen.algebras import Series, SimpleAlgebra
+from basisgen.representations import Irrep
+from basisgen.weights import Weight
 
 import unittest
 import collections

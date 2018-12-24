@@ -1,5 +1,5 @@
-from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.weights import Weight
+from basisgen.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
+from basisgen.weights import Weight
 
 import unittest
 

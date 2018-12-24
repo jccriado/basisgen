@@ -1,7 +1,7 @@
 import argparse
 import cProfile
 
-from invariants.smeft import smeft, sm_field_classes
+from basisgen.smeft import smeft, sm_field_classes
 
 
 def parse_arguments():

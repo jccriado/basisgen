@@ -1,6 +1,6 @@
-from invariants.eft import Operator, EFT
-from invariants.smeft import sm_gauge_algebra, smeft, phi, phic, u, uc, gL, gR
-from invariants.weights import Weight
+from basisgen.eft import Operator, EFT
+from basisgen.smeft import sm_gauge_algebra, smeft, phi, phic, u, uc, gL, gR
+from basisgen.weights import Weight
 
 import unittest
 from collections import Counter

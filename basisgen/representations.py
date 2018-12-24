@@ -1,7 +1,7 @@
-from invariants.algebras import SemisimpleAlgebra
-from invariants.weights import Weight
-from invariants.statistics import Statistics
-from invariants.containers import MultivaluedMap, OrderedCounter
+from basisgen.algebras import SemisimpleAlgebra
+from basisgen.weights import Weight
+from basisgen.statistics import Statistics
+from basisgen.containers import MultivaluedMap, OrderedCounter
 
 import collections
 import itertools

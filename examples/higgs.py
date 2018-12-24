@@ -1,4 +1,4 @@
-from invariants import algebra, irrep, scalar, Field, EFT
+from basisgen import algebra, irrep, scalar, Field, EFT
 
 phi = Field(
     name='phi',

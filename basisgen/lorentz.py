@@ -1,6 +1,6 @@
-from invariants.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
-from invariants.representations import Irrep
-from invariants.weights import Weight
+from basisgen.algebras import Series, SimpleAlgebra, SemisimpleAlgebra
+from basisgen.representations import Irrep
+from basisgen.weights import Weight
 
 
 lorentz_algebra = SemisimpleAlgebra([

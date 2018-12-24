@@ -1,4 +1,4 @@
-from invariants.weights import Weight
+from basisgen.weights import Weight
 
 import abc
 import collections

@@ -19,7 +19,7 @@ imposed to reduce the number of invariants.
 
 ## Installation
 
-Just do `pip install invariants`. Python 3.6+ is needed.
+Just do `pip install basisgen`. Python 3.6+ is needed.
 
 ## Usage
 
@@ -29,7 +29,7 @@ As an example, we will compute the weight system for the representation of
 A<sub>2</sub> = su(3) with highest weight `(1 1)` (an octet):
 
 ~~~
->>> from invariants import irrep
+>>> from basisgen import irrep
 >>> irrep('A2', '1 1').weights_view()
     (1 1)
 (2 -1) (-1 2)
@@ -84,7 +84,7 @@ compute all the independent invariants built with this field and its derivatives
 (using integration by parts and equations of motion) we can write the script:
 
 ~~~
-from invariants import algebra, irrep, scalar, Field, EFT
+from basisgen import algebra, irrep, scalar, Field, EFT
 
 phi = Field(
     name='phi',
@@ -119,7 +119,7 @@ specified field content (and number covariant derivatives).
 
 #### The Standard Model EFT
 
-The SMEFT is defined in `invariants.smeft`. Check the code the there to see a
+The SMEFT is defined in `basisgen.smeft`. Check the code the there to see a
 more complex example. The script `examples/standard_model.py` makes use of this
 module. To obtain the dimension 8 operators in the SMEFT (with one generation),
 do:

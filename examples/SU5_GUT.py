@@ -1,4 +1,4 @@
-from invariants import (
+from basisgen import (
     irrep, algebra, boson, fermion,  scalar, L_spinor, R_spinor, Field, EFT
 )
 

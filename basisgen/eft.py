@@ -1,8 +1,8 @@
-from invariants.representations import Irrep, IrrepCounter
-from invariants.lorentz import lorentz_algebra, vector
-from invariants.statistics import Statistics
-from invariants.partitions import partitions
-from invariants.weights import Weight
+from basisgen.representations import Irrep, IrrepCounter
+from basisgen.lorentz import lorentz_algebra, vector
+from basisgen.statistics import Statistics
+from basisgen.partitions import partitions
+from basisgen.weights import Weight
 
 from collections import Counter
 import functools
