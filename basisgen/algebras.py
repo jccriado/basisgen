@@ -45,9 +45,16 @@ class SimpleAlgebra(Algebra):
     class IncorrectRank(Exception):
         def __init__(self, series, rank, rank_bounds):
             series = series
+            template_msg = (
+                "Unexpected rank {rank} for algebra series {series}. "
+                "The rank n must satisfy: {rank_bounds}"
+            )
             super().__init__(
-                f"Unexpected rank {rank} for algebra series {series}. "
-                f"The rank n must satisfy: {rank_bounds}"
+                template_msg.format(
+                    rank=rank,
+                    series=series,
+                    rank_bounds=rank_bounds
+                )
             )
 
     def __init__(self, series, rank):
