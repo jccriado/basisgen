@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/jccriado/invariants.svg?token=FCho83xJ9cZySjbkvBWS&branch=master)](https://travis-ci.com/jccriado/invariants)
+[![Build Status](https://travis-ci.com/jccriado/basisgen.svg?token=FCho83xJ9cZySjbkvBWS&branch=master)](https://travis-ci.com/jccriado/basisgen)
 
 This is a package for calculating bases of operators in effective field
 theories. It can also be used to compute independent sets of
@@ -19,7 +19,7 @@ imposed to reduce the number of invariants.
 
 ## Installation
 
-Just do `pip install basisgen`. Python 3.6+ is needed.
+Just do `pip install basisgen`. Python 3.5+ is needed.
 
 ## Usage
 
