@@ -1,5 +1,5 @@
 from basisgen.eft import Operator, EFT
-from basisgen.smeft import sm_gauge_algebra, smeft, phi, phic, u, uc, gL, gR
+from basisgen.smeft import sm_gauge_algebra, smeft, phi, phic, u, uc, GL, GR
 from basisgen.weights import Weight
 
 import unittest
@@ -37,8 +37,8 @@ class TestSMEFT(unittest.TestCase):
     def test_3_flavors(self):
         self.assertEqual(smeft(3).invariants(4).count(), 62)
 
-    def test_operator_u_uc_gL_gR_D(self):
-        operator = u(1) * uc(1) * gL * gR
+    def test_operator_u_uc_GL_GR_D(self):
+        operator = u(1) * uc(1) * GL * GR
 
         self.assertEqual(
             operator.invariants(8, ignore_lower_dimensions=True),
