@@ -39,6 +39,27 @@ def parse_arguments():
         const=True
     )
 
+    argument_parser.add_argument(
+        '--detailed',
+        action='store_const',
+        default=False,
+        const=True
+    )
+
+    argument_parser.add_argument(
+        '--no_eom',
+        action='store_const',
+        default=False,
+        const=True
+    )
+
+    argument_parser.add_argument(
+        '--covariants',
+        action='store_const',
+        default=False,
+        const=True
+    )
+
     return argument_parser.parse_args()
 
 
@@ -49,22 +70,32 @@ if __name__ == '__main__':
         profiler = cProfile.Profile()
         profiler.enable()
 
-    invariants = smeft(arguments.number_of_flavors).invariants(
+    if arguments.covariants:
+        operators_generator = smeft(arguments.number_of_flavors).covariants
+    else:
+        operators_generator = smeft(arguments.number_of_flavors).invariants
+
+    operators = operators_generator(
         arguments.dimension,
         verbose=True,
-        ignore_lower_dimension=not arguments.include_lower_dimension
+        ignore_lower_dimension=not arguments.include_lower_dimension,
+        use_eom=not arguments.no_eom
     )
 
     if arguments.profile:
         profiler.disable()
 
-    print("Number of invariants: {}".format(invariants.count()))
+    if not arguments.covariants:
+        print("Number of operators: {}".format(operators.count()))
 
-    print(
-        invariants.show_by_classes(
-            classes=sm_field_classes(arguments.number_of_flavors)
+    if arguments.detailed or arguments.covariants:
+        print(operators)
+    else:
+        print(
+            operators.show_by_classes(
+                classes=sm_field_classes(arguments.number_of_flavors)
+            )
         )
-    )
 
     if arguments.profile:
         profiler.print_stats(sort='time')
