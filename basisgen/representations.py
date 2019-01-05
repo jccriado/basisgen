@@ -82,7 +82,9 @@ class Irrep(object):
         self.highest_weight = highest_weight
 
     def __str__(self):
-        return "[{weight}]".format(weight=self.highest_weight)
+        return "[{}]".format(
+            " ".join(map(str, self.highest_weight.components))
+        )
 
     def __repr__(self):
         return "Irrep({algebra}, {weight})".format(
@@ -164,7 +166,7 @@ class Irrep(object):
                 return self._mul_simple_irreps(other)
 
         else:
-            return Irrep.product(IrrepCounter([self]), other)
+            return IrrepCounter([self]) * other
 
     __rmul__ = __mul__
 
