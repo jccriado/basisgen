@@ -21,7 +21,7 @@ class Field(object):
             statistics=Statistics.BOSON,
             dimension=1,
             number_of_derivatives=0,
-            number_of_flavors=1,
+            number_of_flavors=1
     ):
         if charges is None:
             charges = []
@@ -90,14 +90,12 @@ class Field(object):
             lorentz_irreps = [Irrep(lorentz_algebra, highest_weight)]
 
         else:
-            # TODO: check this
-            lorentz_irreps = itertools.chain.from_iterable(
+            lorentz_irreps = (
                 self.lorentz_irrep
-                * vector.power(n, statistics=Statistics.BOSON)
-                for n in range(times % 2, times + 1, 2)
-            )
+                * vector.power(times, statistics=Statistics.BOSON)
+            ).elements()
 
-        return {
+        return (
             Field(
                 name=self.name,
                 lorentz_irrep=lorentz_irrep,
@@ -109,7 +107,7 @@ class Field(object):
                 number_of_flavors=self.number_of_flavors
             )
             for lorentz_irrep in lorentz_irreps
-        }
+        )
 
     @property
     def conjugate(self):
@@ -182,10 +180,10 @@ class Operator(object):
             for charge in self.charges
         )
 
-    def differentiate_fields(self, times):
+    def differentiate_fields(self, times, use_eom):
         def differentiate_field_by_partition(field, partition):
             chains = itertools.product(*(
-                field.differentiate(number_of_derivatives)
+                field.differentiate(number_of_derivatives, use_eom=use_eom)
                 for number_of_derivatives in partition
             ))
 
@@ -253,7 +251,12 @@ class Operator(object):
             IrrepCounter()
         )
 
-    def irreps_with_derivatives(self, max_dimension, filter_internal_singlets):
+    def irreps_with_derivatives(
+            self,
+            max_dimension,
+            filter_internal_singlets,
+            use_eom
+    ):
         max_derivatives = int(max_dimension - self.dimension)
 
         return {
@@ -264,12 +267,15 @@ class Operator(object):
                     for irrep, count in operator.irreps.items()
                     if not filter_internal_singlets or irrep[2:].is_singlet
                 })
-                for operator in self.differentiate_fields(n_derivatives)
+                for operator in self.differentiate_fields(
+                        n_derivatives,
+                        use_eom
+                )
             )
             for n_derivatives in range(max_derivatives + 1)
         }
 
-    def irreps_without_total_derivatives(self, max_dimension):
+    def irreps_without_total_derivatives(self, max_dimension, use_eom):
         def total_derivatives(initial_irrep, derivative_count):
             return Operator.total_derivatives(
                 initial_irrep,
@@ -284,7 +290,7 @@ class Operator(object):
                     for irrep, count in counter.items()
                 })
 
-        out_irreps = self.irreps_with_derivatives(max_dimension, True)
+        out_irreps = self.irreps_with_derivatives(max_dimension, True, use_eom)
 
         for derivative_count in range(int(max_dimension - self.dimension)):
             current_irreps = out_irreps[derivative_count].items()
@@ -295,7 +301,12 @@ class Operator(object):
 
         return out_irreps
 
-    def invariants(self, max_dimension, ignore_lower_dimensions=False):
+    def invariants(
+            self,
+            max_dimension,
+            ignore_lower_dimensions=False,
+            use_eom=True
+    ):
         def correct_dimension(number_of_derivatives):
             return (
                 not ignore_lower_dimensions
@@ -308,7 +319,7 @@ class Operator(object):
                 if irrep.is_singlet
             )
 
-        irreps = self.irreps_without_total_derivatives(max_dimension)
+        irreps = self.irreps_without_total_derivatives(max_dimension, use_eom)
 
         return {
             number_of_derivatives: sum_singlets(irrep_counter)
@@ -317,8 +328,13 @@ class Operator(object):
             if sum_singlets(irrep_counter)
         }
 
-    def covariants(self, max_dimension, ignore_lower_dimensions=False):
-        irreps = self.irreps_with_derivatives(max_dimension, False)
+    def covariants(
+            self,
+            max_dimension,
+            ignore_lower_dimensions=False,
+            use_eom=True
+    ):
+        irreps = self.irreps_with_derivatives(max_dimension, False, use_eom)
         max_derivatives = max_dimension - self.dimension
 
         return {
@@ -449,14 +465,14 @@ class EFT(object):
 
         max_exponent = math.floor(max_dimension / fields[0].dimension)
 
-        return [
+        return (
             Counter({fields[0]: exponent}) + combination
             for exponent in range(max_exponent + 1)
             for combination in EFT._combinations(
                     fields[1:],
                     max_dimension - exponent * fields[0].dimension
             )
-        ]
+        )
 
     def operators(self, max_dimension):
         return map(Operator, EFT._combinations(self.fields, max_dimension))
@@ -465,7 +481,8 @@ class EFT(object):
             self,
             max_dimension,
             verbose=False,
-            ignore_lower_dimension=False
+            ignore_lower_dimension=False,
+            use_eom=True
     ):
         result = {}
 
@@ -479,8 +496,11 @@ class EFT(object):
         )
 
         operators_printer.start()
-        operators = list(self.operators(max_dimension))
-        total = len(operators)
+        operators = self.operators(max_dimension)
+        total = None
+        if verbose:
+            operators = list(operators)
+            total = len(operators)
         operators_printer.end()
 
         invariants_printer.start()
@@ -490,7 +510,8 @@ class EFT(object):
             if operator.content and operator.is_neutral:
                 result[operator] = operator.invariants(
                     max_dimension,
-                    ignore_lower_dimension
+                    ignore_lower_dimension,
+                    use_eom
                 )
         invariants_printer.end()
 
@@ -500,7 +521,8 @@ class EFT(object):
             self,
             max_dimension,
             verbose=False,
-            ignore_lower_dimension=False
+            ignore_lower_dimension=False,
+            use_eom=True
     ):
         result = {}
 
@@ -526,7 +548,8 @@ class EFT(object):
             if operator.content:
                 covariants = operator.covariants(
                     max_dimension,
-                    ignore_lower_dimension
+                    ignore_lower_dimension,
+                    use_eom
                 )
                 for number_of_derivatives, irreps in covariants.items():
                     for irrep, count in irreps.items():
