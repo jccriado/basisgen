@@ -43,7 +43,7 @@ and an anti-triplet) is done directly as:
 
 ``` python-console
 >>> irrep('A2', '1 0') * irrep('A2', '0 1')
-[(1 1)] + [(0 0)]
+[1 1] + [0 0]
 ```
 
 This also works for semisimple algebras:
@@ -147,60 +147,3 @@ internal symmetry group is _SU(5)_. In `examples/SU5_GUT.py` the code that
 defines this theory can be found. It outputs 83 possible field contents for
 operators, each of them with corresponding the number of independent operators
 of that form.
-
-## Summary of basic objects
-
-### Functions
-
-- `algebra`. Creates a (semi)simple Lie algebra (`algebras.SimpleAlgebra` or
-  `algebras.SemisimpleAlgebra`) from one string argument. Examples of valid
-  arguments are: `'A3'`, `'C12'`, `'F4'`, `'SU3'`, `'B2 + E7'` or `'SU5 x SO6 x
-  Sp10'`.
-
-- `irrep`. Creates an irreducible representation (`representations.Irrep`) from
-  2 string arguments: the first represents the algebra and the second the
-  highest weight. Example: `irrep('SU4 x Sp7', '1 0 1 0 2 1')`. The weight
-  system of the an irrep can be shown by calling its `weights_view()`
-  method. Irreps can be multiplied to get the decomposition of their tensor
-  product.
-
-### Classes
-
-- `Field`. Useful attribute: `conjugate`. Constructor arguments:
-
-| Name                | Description                                         | Default |
-|---------------------|:----------------------------------------------------|---------|
-| `name`              | String Identifier                                   |         |
-| `lorentz_irrep`     | Lorentz group irrep                                 |         |
-| `internal_irrep`    | Irrep of the internal symmetry group of the theory  |         |
-| `charges`           | Charges under an arbitrary number of _U(1)_ factors | `[]`    |
-| `statistics`        | Either `boson` or `fermion`                         | `boson` |
-| `dimension`         | Energy dimensions of the field                      | `1`     |
-| `number_of_flavors` | Number of different copies of the same field        | `1`     |
-
-
-- `EFT`. Constructor arguments: 
-  - `internal_algebra`, the semisimple Lie algebra of the internal symmetry group
-  - `fields`, a list of `Field` objects representing the field content of the theory.
-  
-  Methods:
-  - `invariants(max_dimension, verbose=False)`. Return a basis of operators,
-  encapsulated in an `EFT.Invariants` object.
-  - `covariants(max_dimension, verbose=False)`. Returns a collection of all
-  operators with all possible irreps, in the form of a `EFT.Covariants`
-  instance.
-  
-  Classes:
-  - `EFT.Invariants`. Can be directly printed (implements `__str__`).  Has a
-  method `count` to calculate the total number of operators in the basis. Has a
-  method `show_by_classes`, which returns a simplified string representation of
-  the basis, provided a dictionary whose keys are the fields and values are
-  strings representing classes of fields.
-  - `EFT.Covariants`. Its only purpose is to hold the information until it is
-  printed (implements `__str__`).
-
-### Variables
-
-- Predefined irreps of the Lorentz group: `scalar`, `L_spinor`, `R_spinor`,
-  `vector`, `L_tensor`, `R_tensor`.
-- Predefined statistics: `boson`, `fermion`.
