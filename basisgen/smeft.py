@@ -3,6 +3,8 @@ from basisgen import (
     boson, fermion, Field, EFT
 )
 
+from fractions import Fraction
+
 sm_gauge_algebra = algebra('SU3 x SU2')
 
 
@@ -14,58 +16,61 @@ phi = Field(
     name='phi',
     lorentz_irrep=scalar,
     internal_irrep=sm_irrep('0 0 1'),
-    charges=[1/2],
+    charges=[Fraction(1, 2)],
     statistics=boson,
     dimension=1
 )
 phic = phi.conjugate
 
-bL = Field(
-    name='bL',
+BL = Field(
+    name='BL',
     lorentz_irrep=L_tensor,
     internal_irrep=sm_irrep('0 0 0'),
     charges=[0],
     statistics=boson,
     dimension=2
 )
-bR = bL.conjugate
+BR = BL.conjugate
+BR.name = 'BR'
 
 
-wL = Field(
-    name='wL',
+WL = Field(
+    name='WL',
     lorentz_irrep=L_tensor,
     internal_irrep=sm_irrep('0 0 2'),
     charges=[0],
     statistics=boson,
     dimension=2
 )
-wR = wL.conjugate
+WR = WL.conjugate
+WR.name = 'WR'
 
-gL = Field(
-    name='gL',
+GL = Field(
+    name='GL',
     lorentz_irrep=L_tensor,
     internal_irrep=sm_irrep('1 1 0'),
     charges=[0],
     statistics=boson,
     dimension=2
 )
-gR = gL.conjugate
+GR = GL.conjugate
+GR.name = 'GR'
 
 
-def q(number_of_flavors=1):
+def Q(number_of_flavors=1):
     return Field(
-        name='q',
+        name='Q',
         lorentz_irrep=L_spinor,
         internal_irrep=sm_irrep('1 0 1'),
-        charges=[1/6],
+        charges=[Fraction(1, 6)],
         statistics=fermion,
         dimension=1.5,
         number_of_flavors=number_of_flavors
     )
 
 
-def qc(number_of_flavors=1):
-    return q(number_of_flavors).conjugate
+def Qc(number_of_flavors=1):
+    return Q(number_of_flavors).conjugate
 
 
 def u(number_of_flavors=1):
@@ -73,7 +78,7 @@ def u(number_of_flavors=1):
         name='u',
         lorentz_irrep=R_spinor,
         internal_irrep=sm_irrep('1 0 0'),
-        charges=[2/3],
+        charges=[Fraction(2, 3)],
         statistics=fermion,
         dimension=1.5,
         number_of_flavors=number_of_flavors
@@ -89,7 +94,7 @@ def d(number_of_flavors=1):
         name='d',
         lorentz_irrep=R_spinor,
         internal_irrep=sm_irrep('1 0 0'),
-        charges=[-1/3],
+        charges=[-Fraction(1, 3)],
         statistics=fermion,
         dimension=1.5,
         number_of_flavors=number_of_flavors
@@ -105,7 +110,7 @@ def L(number_of_flavors=1):
         name='l',
         lorentz_irrep=L_spinor,
         internal_irrep=sm_irrep('0 0 1'),
-        charges=[-1/2],
+        charges=[-Fraction(1, 2)],
         statistics=fermion,
         dimension=1.5,
         number_of_flavors=number_of_flavors
@@ -135,11 +140,11 @@ def ec(number_of_flavors=1):
 def sm_fermions(number_of_flavors):
     return [
         fermion(number_of_flavors)
-        for fermion in [q, qc, u, uc, d, dc, L, Lc, e, ec]
+        for fermion in [Q, Qc, u, uc, d, dc, L, Lc, e, ec]
     ]
 
 
-sm_field_strengths = [bL, bR, wL, wR, gL, gR]
+sm_field_strengths = [BL, BR, WL, WR, GL, GR]
 
 sm_scalars = [phi, phic]
 
