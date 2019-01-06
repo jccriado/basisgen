@@ -19,7 +19,11 @@ imposed to reduce the number of invariants.
 
 ## Installation
 
-Just do `pip install basisgen`. Python 3.5+ is needed.
+```  shell
+$ pip install basisgen
+```
+
+(Python 3.5+ is required)
 
 ## Usage examples
 
