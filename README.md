@@ -147,8 +147,8 @@ $ python standard_model.py --dimension 6 --number_of_flavors 3
 #### SU(5) GUT example
 
 As another example, consider the Georgi-Glashow model of grand unification. The
-internal symmetry group is _SU(5)_. The independent terms in the potential for
-the scalars can be found using the following code:
+internal symmetry group is _SU(5)_. The independent terms in the scalar
+potential can be found using the following code:
 
 ``` python
 from basisgen import irrep, algebra, boson, scalar, Field, EFT
@@ -175,4 +175,16 @@ phi = Field(
 SU5_GUT_scalar_sector = EFT(algebra('SU5'), [Phi, phi, phi.conjugate])
 
 print(SU5_GUT_scalar_sector.invariants(max_dimension=4, verbose=True))
+```
+
+Its output is:
+
+```
+phi phi*: 1
+(phi)^2 (phi*)^2: 1
+Phi phi phi*: 1
+(Phi)^2: 1
+(Phi)^2 phi phi*: 2
+(Phi)^3: 1
+(Phi)^4: 2
 ```
