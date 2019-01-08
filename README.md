@@ -146,8 +146,33 @@ $ python standard_model.py --dimension 6 --number_of_flavors 3
 
 #### SU(5) GUT example
 
-As another example, consider the Georgi-Glashow model of grand unification.  The
-internal symmetry group is _SU(5)_. In `examples/SU5_GUT.py` the code that
-defines this theory can be found. It outputs 83 possible field contents for
-operators, each of them with corresponding the number of independent operators
-of that form.
+As another example, consider the Georgi-Glashow model of grand unification. The
+internal symmetry group is _SU(5)_. The independent terms in the potential for
+the scalars can be found using the following code:
+
+``` python
+from basisgen import irrep, algebra, boson, scalar, Field, EFT
+
+irrep_5 = irrep('SU5', '1 0 0 0')
+irrep_24 = irrep('SU5', '1 0 0 1')
+
+Phi = Field(
+    name='Phi',
+    lorentz_irrep=scalar,
+    internal_irrep=irrep_24,
+    statistics=boson,
+    dimension=1
+)
+
+phi = Field(
+    name='phi',
+    lorentz_irrep=scalar,
+    internal_irrep=irrep_5,
+    statistics=boson,
+    dimension=1
+)
+
+SU5_GUT_scalar_sector = EFT(algebra('SU5'), [Phi, phi, phi.conjugate])
+
+print(SU5_GUT_scalar_sector.invariants(max_dimension=4, verbose=True))
+```
