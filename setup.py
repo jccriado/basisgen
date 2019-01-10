@@ -5,10 +5,9 @@ with open('README.md', mode='r') as readme_file:
 
 setup(
     name='basisgen',
-    version='0.3',
+    version='0.5',
 
     description='Package for the generation of operator bases',
-    long_description=readme,
 
     url='https://github.com/jccriado/basisgen',
 
