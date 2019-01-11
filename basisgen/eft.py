@@ -427,11 +427,23 @@ class EFT(object):
             )
 
         @staticmethod
-        def _show_irrep_charges(irrep, charges):
+        def _show_irrep_charges(lorentz_irrep, internal_irrep, charges):
             if len(charges) == 1:
-                return "[irrep={}, charge={}]".format(irrep, charges[0])
+                return (
+                    "[lorentz={}  internal={}, charge={}]".format(
+                        lorentz_irrep,
+                        internal_irrep,
+                        charges[0]
+                    )
+                )
             else:
-                return "[irrep={}, charges={}]".format(irrep, charges)
+                return (
+                    "[lorentz={}, internal={}, charges={}]".format(
+                        lorentz_irrep,
+                        internal_irrep,
+                        charges
+                    )
+                )
 
         @staticmethod
         def _show_irrep_operators(irrep_charges, operator_counter):
@@ -554,7 +566,8 @@ class EFT(object):
                 for number_of_derivatives, irreps in covariants.items():
                     for irrep, count in irreps.items():
                         irrep_with_charges = (
-                            irrep.highest_weight,
+                            irrep.highest_weight[:2],
+                            irrep.highest_weight[2:],
                             tuple(operator.charges)
                         )
                         result.setdefault(irrep_with_charges, Counter())
