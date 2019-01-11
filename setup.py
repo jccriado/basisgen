@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='basisgen',
-    version='1.0',
+    version='1.0.1',
 
     description='Package for the generation of operator bases',
 
