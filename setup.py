@@ -5,7 +5,7 @@ with open('README.md', mode='r') as readme_file:
 
 setup(
     name='basisgen',
-    version='0.5',
+    version='1.0',
 
     description='Package for the generation of operator bases',
 
