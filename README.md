@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/jccriado/basisgen.svg?token=FCho83xJ9cZySjbkvBWS&branch=master)](https://travis-ci.com/jccriado/basisgen)
+[![Build Status](https://travis-ci.com/jccriado/basisgen.svg?branch=master)](https://travis-ci.com/jccriado/basisgen)
 
 This is a package for calculating bases of operators in effective field
 theories. It can also be used to compute independent sets of
