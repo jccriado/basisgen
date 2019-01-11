@@ -1,8 +1,5 @@
 from distutils.core import setup
 
-with open('README.md', mode='r') as readme_file:
-    readme = readme_file.read()
-
 setup(
     name='basisgen',
     version='1.0',
