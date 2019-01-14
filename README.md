@@ -188,3 +188,7 @@ Phi phi phi*: 1
 (Phi)^3: 1
 (Phi)^4: 2
 ```
+
+## Citation
+
+If you use this work, please cite: https://arxiv.org/abs/1901.03501
