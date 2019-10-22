@@ -1,5 +1,5 @@
 from basisgen import (
-    irrep, algebra, scalar, L_spinor, R_spinor, L_tensor,
+    irrep, algebra, scalar, L_spinor, R_spinor,
     boson, fermion, Field, EFT
 )
 
