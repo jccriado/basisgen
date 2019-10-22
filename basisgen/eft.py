@@ -1,5 +1,5 @@
 from basisgen.representations import Irrep, IrrepCounter
-from basisgen.lorentz import lorentz_algebra, vector
+from basisgen.lorentz import lorentz_algebra, vector, L_tensor, R_tensor
 from basisgen.statistics import Statistics
 from basisgen.partitions import partitions
 from basisgen.weights import Weight
@@ -34,6 +34,7 @@ class Field(object):
         self.dimension = dimension
         self.number_of_derivatives = number_of_derivatives
         self.number_of_flavors = number_of_flavors
+        self._force_use_eom = False
 
     def __hash__(self):
         return hash((self.name, self.number_of_derivatives))
@@ -83,7 +84,7 @@ class Field(object):
         return self.lorentz_irrep + self.internal_irrep
 
     def differentiate(self, times, use_eom=True):
-        if use_eom:
+        if use_eom or self._force_use_eom:
             highest_weight = (
                 Weight([times, times]) + self.lorentz_irrep.highest_weight
             )
@@ -125,6 +126,29 @@ class Field(object):
             number_of_derivatives=self.number_of_derivatives,
             number_of_flavors=self.number_of_flavors
         )
+
+    @staticmethod
+    def strength_tensors(name, internal_irrep, charges=None):
+        FL = Field(
+            name=f'{name}L',
+            lorentz_irrep=L_tensor,
+            internal_irrep=internal_irrep,
+            charges=charges,
+            statistics=Statistics.BOSON,
+            dimension=2,
+        )
+
+        FR = Field(
+            name=f'{name}R',
+            lorentz_irrep=R_tensor,
+            internal_irrep=internal_irrep,
+            charges=charges,
+            statistics=Statistics.BOSON,
+            dimension=2,
+        )
+        FR._force_use_eom = True
+
+        return FL, FR
 
 
 class Operator(object):

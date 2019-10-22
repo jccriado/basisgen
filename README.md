@@ -122,6 +122,7 @@ Total: 11
 Each line gives the number of independent invariant operators with the
 specified field content (and number covariant derivatives).
 
+
 #### The Standard Model EFT
 
 The SMEFT is defined in `basisgen.smeft`. See the code there for a more complex
@@ -188,6 +189,40 @@ Phi phi phi*: 1
 (Phi)^3: 1
 (Phi)^4: 2
 ```
+
+### Defining field strength tensors
+
+Gauge field strength tensors can be defined as any other field using the
+`Field` class constructor. However, it is convenient to use the static method
+`Field.strength_tensors` to directly obtain a pair of dimension-2 boson fields
+transforming under Lorentz as (1, 0) and (0, 1), respectively. An example
+of use:
+
+```python
+from basisgen import irrep, algebra, Field, EFT
+
+BL, BR = Field.strength_tensors(
+    name='B',
+    internal_irrep=irrep('SU2', '0'),
+    charges=[0],
+)
+
+my_eft = EFT(algebra('SU2'), [BL, BR])
+
+invariants = my_eft.invariants(max_dimension=8, use_eom=False)
+
+print(invariants)
+```
+
+The `Field.strength_tensors` method ensures that Bianchi identities are used
+to reduce the basis, even in `use_eom=False` mode. This is demonstrated in the
+example above. If the fields `BL` and `BR` where naively defined using the
+`Field` constructor, setting `use_eom=False` prevents the Bianchi identities
+from being used, as they take the same form as the equation of motion for the
+dual field strength tensor. `Field.strength_tensors` forces the use of the
+equations of motion for one of the 2 fields it creates. Equivalently, this can
+be done manually by setting `BR._force_use_eom=True`.
+
 
 ## Citation
 

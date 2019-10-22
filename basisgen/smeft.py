@@ -22,39 +22,23 @@ phi = Field(
 )
 phic = phi.conjugate
 
-BL = Field(
-    name='BL',
-    lorentz_irrep=L_tensor,
+BL, BR = Field.strength_tensors(
+    name='B',
     internal_irrep=sm_irrep('0 0 0'),
     charges=[0],
-    statistics=boson,
-    dimension=2
 )
-BR = BL.conjugate
-BR.name = 'BR'
 
-
-WL = Field(
-    name='WL',
-    lorentz_irrep=L_tensor,
+WL, WR = Field.strength_tensors(
+    name='W',
     internal_irrep=sm_irrep('0 0 2'),
     charges=[0],
-    statistics=boson,
-    dimension=2
 )
-WR = WL.conjugate
-WR.name = 'WR'
 
-GL = Field(
-    name='GL',
-    lorentz_irrep=L_tensor,
+GL, GR = Field.strength_tensors(
+    name='G',
     internal_irrep=sm_irrep('1 1 0'),
     charges=[0],
-    statistics=boson,
-    dimension=2
 )
-GR = GL.conjugate
-GR.name = 'GR'
 
 
 def Q(number_of_flavors=1):

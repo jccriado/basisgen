@@ -73,7 +73,12 @@ if __name__ == '__main__':
     if arguments.covariants:
         operators_generator = smeft(arguments.number_of_flavors).covariants
     else:
-        operators_generator = smeft(arguments.number_of_flavors).invariants
+        eft = smeft(arguments.number_of_flavors)
+        eft.fields[4].use_eom = True
+        eft.fields[6].use_eom = True
+        eft.fields[8].use_eom = True
+
+        operators_generator = eft.invariants
 
     operators = operators_generator(
         arguments.dimension,
