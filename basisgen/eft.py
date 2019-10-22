@@ -130,7 +130,7 @@ class Field(object):
     @staticmethod
     def strength_tensors(name, internal_irrep, charges=None):
         FL = Field(
-            name=f'{name}L',
+            name='{name}L'.format(name=name),
             lorentz_irrep=L_tensor,
             internal_irrep=internal_irrep,
             charges=charges,
@@ -139,7 +139,7 @@ class Field(object):
         )
 
         FR = Field(
-            name=f'{name}R',
+            name='{name}R'.format(name=name),
             lorentz_irrep=R_tensor,
             internal_irrep=internal_irrep,
             charges=charges,
