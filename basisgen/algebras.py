@@ -1,7 +1,7 @@
 from basisgen.weights import Weight
 
 import abc
-import collections
+import collections.abc
 import enum
 import functools
 import itertools
@@ -335,7 +335,7 @@ class SimpleAlgebra(Algebra):
             return [10, 6]
 
 
-class SemisimpleAlgebra(collections.Iterable, Algebra):
+class SemisimpleAlgebra(collections.abc.Iterable, Algebra):
     def __init__(self, simple_algebras):
         self.simple_algebras = simple_algebras
         self.rank = sum(
