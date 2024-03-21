@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name="basisgen",
-    version="1.0.3",
+    version="1.0.4",
     description="Package for the generation of operator bases",
     url="https://github.com/jccriado/basisgen",
     author="Juan Carlos Criado",
